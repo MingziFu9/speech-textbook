@@ -13,8 +13,15 @@ description: 本书主要术语的中英文名称、简明定义和例子，按�
 
 | 术语 | 英文 | 定义 | 例子 |
 |---|---|---|---|
-| <span id="g-示例术语"></span>示例术语 | Example Term | 这里是术语表中的定义，鼠标悬停时显示 | 写一个学生熟悉的例子 |
-| <span id="g-另一个术语"></span>另一个术语 | Another Term | 以示例术语为基础的概念 | …… |
+| <span id="g-语音识别"></span>语音识别 | Automatic Speech Recognition, ASR | 让计算机把人说的话转换成文字的技术，也叫语音转文字（STT） | 微信语音转文字、会议实时字幕 |
+| <span id="g-语音合成"></span>语音合成 | Text to Speech, TTS | 让计算机把文字转换成自然语音的技术，也叫文语转换 | 导航播报路况、有声书 |
+| <span id="g-语音克隆"></span>语音克隆 | Voice Cloning | 用某个人的少量录音，让机器用这个人的音色说出任意内容的技术 | 用 10 秒参考录音，让合成语音带上志愿者的嗓音 |
+| <span id="g-声纹识别"></span>声纹识别 | Speaker Recognition | 根据声音判断说话人是谁或是不是某个人的技术，也叫说话人识别 | 银行电话客服用声纹核验身份 |
+| <span id="g-语音唤醒"></span>语音唤醒 | Wake-up Word Detection | 设备持续监听，只在听到特定唤醒词时才开始工作的技术，也叫关键词检测 | 说“小爱同学”唤醒智能音箱 |
+| <span id="g-语音交互"></span>语音交互 | Voice Interaction | 人和机器之间用说话和听声音来交流的方式，通常由唤醒、识别、理解、回答、合成几个环节组成 | 车载语音助手导航 |
+| <span id="g-语音大模型"></span>语音大模型 | Speech Large Model | 能直接听懂语音并直接用语音回答的大模型，不必先转成文字 | 能实时对话、可以随时打断的语音助手 |
+| <span id="g-离线模型"></span>离线模型 | Offline Model | 下载到本机运行、不需要联网调用云端服务的模型 | 本书用 sherpa-onnx 在笔记本电脑上运行的识别和合成模型 |
+| <span id="g-sherpa-onnx"></span>sherpa-onnx | sherpa-onnx | 新一代 Kaldi 团队开源的语音工具包，能在电脑和手机上离线运行识别、合成、唤醒、声纹等模型 | 本书全部实验的主力工具 |
 
 ## 第 2 章 声音的数字化与音频处理
 
