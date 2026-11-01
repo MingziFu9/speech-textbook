@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>延迟拆解</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+.ctl { display:grid; grid-template-columns:150px 1fr 70px; gap:6px 10px; align-items:center; margin:6px 0; }
+@media (max-width:620px) { .ctl { grid-template-columns:110px 1fr 60px; } }
+.presets button { padding:6px 12px; margin:0 6px 6px 0; border:1px solid var(--line); border-radius:16px; background:#fff; cursor:pointer; font-size:13px; }
+.presets button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+.timeline { display:flex; height:34px; border-radius:6px; overflow:hidden; margin:10px 0 4px; border:1px solid var(--line); }
+.timeline div { color:#fff; font-size:12px; display:flex; align-items:center; justify-content:center; white-space:nowrap; overflow:hidden; }
+.total { font-size:22px; font-weight:600; }
+</style>
+</head>
+<body>
+<h1>延迟拆解：居民说完话，要等多久才听到回答？</h1>
+<div class="sub">一次语音问答要经过“等说完 → 识别 → 理解 → 合成第一句（→ 网络传输）”。拖动每个环节的耗时，或点上方的预设，看总等待时间和体验评价。</div>
+<div class="presets" id="presets"></div>
+<div id="ctls"></div>
+<div class="timeline" id="tl"></div>
+<div>用户等待：<span class="total" id="total"></span>　<span id="rate"></span></div>
+<div class="msg" id="msg"></div>
+<div class="note">“本书实测”来自实验 9-4（编者笔记本 CPU，SenseVoice 识别、关键词匹配、Matcha 合成）。其他预设是编者按常见情况设定的示意数值，不是实测：大模型回答的耗时随模型、网络和回答长度变化很大。人与人对话时，一方说完到另一方开口通常只有几百毫秒。</div>
+<script>
+(function () {
+  var S = [
+    { k: "vad", name: "等说完（静音判断）", short: "等说完", max: 1.5, color: "#90a4ae" },
+    { k: "asr", name: "识别", short: "识别", max: 3, color: "#1e88e5" },
+    { k: "nlu", name: "理解（找答案）", short: "理解", max: 3, color: "#8e24aa" },
+    { k: "tts", name: "合成第一句", short: "合成", max: 3, color: "#fb8c00" },
+    { k: "net", name: "网络传输", short: "网络", max: 1, color: "#43a047" }
+  ];
+  var P = {
+    "本书实测": { vad: 0.5, asr: 0.37, nlu: 0.0, tts: 0.49, net: 0 },
+    "整段合成完再播": { vad: 0.5, asr: 0.37, nlu: 0.0, tts: 1.15, net: 0 },
+    "接云端大模型（示意）": { vad: 0.5, asr: 0.37, nlu: 1.5, tts: 0.49, net: 0.3 },
+    "全部上云、网络慢（示意）": { vad: 0.8, asr: 0.6, nlu: 2.0, tts: 0.8, net: 0.8 },
+    "调优后（示意）": { vad: 0.3, asr: 0.2, nlu: 0.4, tts: 0.15, net: 0.1 }
+  };
+  var v = {};
+  function $(id) { return document.getElementById(id); }
+  $("presets").innerHTML = Object.keys(P).map(function (n) { return '<button data-p="' + n + '">' + n + '</button>'; }).join("");
+  $("ctls").innerHTML = S.map(function (s) {
+    return '<div class="ctl"><span>' + s.name + '</span><input type="range" id="r-' + s.k + '" min="0" max="' + s.max + '" step="0.01"><span class="mono" id="v-' + s.k + '"></span></div>';
+  }).join("");
+  function set(name) {
+    Object.keys(P[name]).forEach(function (k) { v[k] = P[name][k]; $("r-" + k).value = v[k]; });
+    document.querySelectorAll("[data-p]").forEach(function (b) { b.classList.toggle("on", b.dataset.p === name); });
+    render();
+  }
+  function render() {
+    var total = 0;
+    S.forEach(function (s) { v[s.k] = +$("r-" + s.k).value; total += v[s.k]; $("v-" + s.k).textContent = v[s.k].toFixed(2) + " 秒"; });
+    $("tl").innerHTML = S.map(function (s) {
+      var w = total ? v[s.k] / total * 100 : 0;
+      return w > 0 ? '<div style="width:' + w + '%;background:' + s.color + '" title="' + s.name + '">' + (w > 7 ? s.short : "") + '</div>' : "";
+    }).join("");
+    $("total").textContent = total.toFixed(2) + " 秒";
+    var r = total < 1 ? "很流畅，接近人和人对话" : total < 2 ? "可以接受" : total < 4 ? "有点慢，用户会觉得在“等”" : "太慢，用户可能以为没听见，又说一遍";
+    $("rate").textContent = r;
+    var big = S.slice().sort(function (a, b) { return v[b.k] - v[a.k]; })[0];
+    $("msg").textContent = "最耗时的环节是“" + big.name + "”（" + v[big.k].toFixed(2) + " 秒）。" +
+      ({ vad: "静音等待太短会把用户的停顿当成说完，太长又让人干等，可以 0.3—0.6 秒折中。",
+         asr: "可以换更小的模型、用流式识别边说边识别。",
+         nlu: "大模型回答慢，可以先用关键词匹配常见问题，只把难题交给大模型，并让大模型流式输出。",
+         tts: "只合成第一句就开始播放，后面边播边合成；或换更快的合成模型。",
+         net: "把模型放在本地或离用户近的服务器上。" })[big.k];
+  }
+  document.querySelectorAll("[data-p]").forEach(function (b) { b.onclick = function () { set(b.dataset.p); }; });
+  S.forEach(function (s) { $("r-" + s.k).oninput = function () { document.querySelectorAll("[data-p]").forEach(function (b) { b.classList.remove("on"); }); render(); }; });
+  set("本书实测");
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

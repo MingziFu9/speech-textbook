@@ -23,3 +23,4 @@ description: 本书配套的交互动画，可以在浏览器里直接操作，�
 | 第 7 章 | [门槛与两种错误](threshold-errors/index.md) | 拖动门槛看误接受和误拒绝，切换电话音质 |
 | 第 8 章 | [这样克隆合规吗](clone-compliance/index.md) | 10 个克隆情境判断，看答案和依据条款 |
 | 第 8 章 | [参考时长与相似度](clone-settings/index.md) | 改参考音长度和生成步数，听克隆结果、比相似度 |
+| 第 9 章 | [延迟拆解](latency-breakdown/index.md) | 调各环节耗时，看用户要等多久、该优化哪里 |

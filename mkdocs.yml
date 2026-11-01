@@ -62,6 +62,7 @@ nav:
     - "声纹地图": sims/voiceprint-map/index.md
     - "这样克隆合规吗": sims/clone-compliance/index.md
     - "参考时长与相似度": sims/clone-settings/index.md
+    - "延迟拆解": sims/latency-breakdown/index.md
   - 学习图谱: learning-graph/index.md
   - 常见问题: faq/index.md
   - "在线模拟卷": mock-exam.md

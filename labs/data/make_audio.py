@@ -247,9 +247,29 @@ def make_ref_lengths():
     write_csv(out / "ref_lengths.csv", rows, ["文件", "时长秒", "文字"])
 
 
+# ---------- 第 9 章：居民提问（测试语音问答小助手） ----------
+QUESTIONS = [  # (文字, 音色, 应该匹配的问答编号，0 表示问答库里没有)
+    ("请问老年食堂中午几点开饭？", 30, 1), ("我想给我妈量个血压，卫生服务站什么时候可以去？", 70, 2),
+    ("明天是不是要停水？", 20, 3), ("我家暖气一点都不热，怎么办？", 85, 4),
+    ("电动车可以在哪里充电？", 65, 5), ("厨余垃圾几点可以扔？", 45, 6),
+    ("刚才有人打电话说我医保卡冻结了，让我转账，是真的吗？", 10, 8), ("小区附近有没有好吃的火锅店？", 90, 0),
+]
+
+
+def make_questions():
+    out = DATA / "questions"
+    out.mkdir(exist_ok=True)
+    rows = []
+    for k, (text, sid, faq) in enumerate(QUESTIONS, 1):
+        file = out / f"q_{k}.wav"
+        save_audio(file, say(text, sid), 16000)
+        rows.append([file.name, text, faq])
+    write_csv(out / "questions.csv", rows, ["文件", "文字", "应匹配的问答编号"])
+
+
 if __name__ == "__main__":
     only = sys.argv[1:]                       # 例如 python data/make_audio.py make_sounds 只重新生成第 2 章的声音
-    for f in (make_sounds, make_calls, make_meeting, make_kws, make_hotwords, make_voices, make_speaker_test, make_ref_lengths):
+    for f in (make_sounds, make_calls, make_meeting, make_kws, make_hotwords, make_voices, make_speaker_test, make_ref_lengths, make_questions):
         if only and f.__name__ not in only:
             continue
         print("生成", f.__name__)
