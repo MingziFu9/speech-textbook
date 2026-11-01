@@ -51,6 +51,9 @@ nav:
     - "语音对话流水线": sims/speech-pipeline/index.md
     - "采样与量化": sims/sampling-quantization/index.md
     - "看见声音": sims/spectrogram-viewer/index.md
+    - "字错率计算器": sims/cer-calculator/index.md
+    - "CTC 折叠": sims/ctc-collapse/index.md
+    - "DTW 对齐": sims/dtw-align/index.md
   - 学习图谱: learning-graph/index.md
   - 常见问题: faq/index.md
   - "在线模拟卷": mock-exam.md

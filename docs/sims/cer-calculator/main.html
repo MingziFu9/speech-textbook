@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>字错率计算器</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+.al { display:flex; flex-wrap:wrap; gap:2px; margin:8px 0; }
+.col { display:flex; flex-direction:column; align-items:center; min-width:30px; border-radius:5px; padding:3px 2px; font-size:17px; }
+.col span { line-height:1.5; } .col small { font-size:10px; color:var(--muted); }
+.C { background:#e8f5e9; } .S { background:#fff3e0; outline:2px solid var(--warn); } .D { background:#ffebee; outline:2px solid var(--neg); } .I { background:#e3f2fd; outline:2px solid #1e88e5; }
+.lab { display:grid; grid-template-columns:5em 1fr; gap:6px; align-items:center; margin:4px 0; }
+</style>
+</head>
+<body>
+<h1>字错率计算器：替换、删除、插入各几个</h1>
+<div class="sub">输入参考答案（原文）和识别结果，程序先找出“改动最少”的对齐方式，再数出替换、删除、插入的个数。字错率 = (替换 + 删除 + 插入) ÷ 参考答案的字数。</div>
+<div class="row ex"><span class="lbl">例子：</span>
+  <button data-r="请尽快处理" data-h="请景快处理">替换</button>
+  <button data-r="楼道里的灯坏了" data-h="楼道的灯坏了了">删除＋插入</button>
+  <button data-r="电动车充电桩" data-h="电动车充电装晚上">字错率超过一半</button>
+  <button data-r="我是五号楼的住户" data-h="我是5号楼的住户">写法不同</button>
+  <button data-r="你好" data-h="你好你好你好">字错率超过 100%</button>
+</div>
+<div class="lab"><span>参考答案</span><input type="text" id="r" value="楼道里的灯坏了"></div>
+<div class="lab"><span>识别结果</span><input type="text" id="h" value="楼道的灯坏了了"></div>
+<div class="row"><label><input type="checkbox" id="np" checked> 去掉标点和空格</label><label><input type="checkbox" id="nd"> 统一数字写法（五→5）</label></div>
+<div class="al" id="al"></div>
+<div class="row" style="font-size:12px"><span class="col C" style="font-size:12px">对</span><span class="col S" style="font-size:12px">替换</span><span class="col D" style="font-size:12px">删除（漏了）</span><span class="col I" style="font-size:12px">插入（多了）</span></div>
+<table class="t"><tr><th>参考字数 N</th><th>替换 S</th><th>删除 D</th><th>插入 I</th><th>字错率 (S+D+I)/N</th><th>准确率 1−字错率</th></tr>
+<tr><td id="n"></td><td id="s"></td><td id="d"></td><td id="i"></td><td id="c" class="big"></td><td id="a"></td></tr></table>
+<div class="msg" id="msg"></div>
+<div class="note">和实验 3-3 里 <code>voicelab.cer</code> 的算法相同（编辑距离）。插入可以无限多，所以字错率可能超过 100%，这时“准确率”会变成负数，没有意义。</div>
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  var PUNCT = /[，。！？、；：,.!?;:“”"'‘’（）()\s　]/g, DIG = "零一二三四五六七八九";
+  function prep(s) { if ($("np").checked) s = s.replace(PUNCT, ""); if ($("nd").checked) s = s.replace(/[零一二三四五六七八九]/g, function (c) { return DIG.indexOf(c); }); return Array.from(s); }
+  function render() {
+    var r = prep($("r").value), h = prep($("h").value), n = r.length, m = h.length, D = [], i, j;
+    for (i = 0; i <= n; i++) { D.push([]); for (j = 0; j <= m; j++) {
+      if (!i) D[i].push(j); else if (!j) D[i].push(i);
+      else D[i].push(Math.min(D[i - 1][j - 1] + (r[i - 1] === h[j - 1] ? 0 : 1), D[i - 1][j] + 1, D[i][j - 1] + 1)); } }
+    var ops = []; i = n; j = m;
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && D[i][j] === D[i - 1][j - 1] + (r[i - 1] === h[j - 1] ? 0 : 1)) { ops.push([r[i - 1] === h[j - 1] ? "C" : "S", r[i - 1], h[j - 1]]); i--; j--; }
+      else if (i > 0 && D[i][j] === D[i - 1][j] + 1) { ops.push(["D", r[i - 1], "　"]); i--; }
+      else { ops.push(["I", "　", h[j - 1]]); j--; } }
+    ops.reverse();
+    var cnt = { C: 0, S: 0, D: 0, I: 0 };
+    $("al").innerHTML = ops.map(function (o) { cnt[o[0]]++; return '<div class="col ' + o[0] + '"><span>' + o[1] + '</span><span>' + o[2] + '</span><small>' + { C: "对", S: "替换", D: "删除", I: "插入" }[o[0]] + '</small></div>'; }).join("");
+    var err = cnt.S + cnt.D + cnt.I, cer = n ? err / n : 0;
+    $("n").textContent = n; $("s").textContent = cnt.S; $("d").textContent = cnt.D; $("i").textContent = cnt.I;
+    $("c").textContent = (cer * 100).toFixed(1) + "%"; $("a").textContent = (100 - cer * 100).toFixed(1) + "%";
+    $("msg").innerHTML = "上排是参考答案，下排是识别结果。(" + cnt.S + " + " + cnt.D + " + " + cnt.I + ") ÷ " + n + " = <b>" + (cer * 100).toFixed(1) + "%</b>" + (cer > 1 ? "，超过了 100%：识别结果多出来的字太多。" : "。");
+  }
+  document.querySelectorAll(".ex button").forEach(function (b) { b.onclick = function () { $("r").value = b.dataset.r; $("h").value = b.dataset.h; render(); }; });
+  ["r", "h"].forEach(function (id) { $(id).oninput = render; }); ["np", "nd"].forEach(function (id) { $(id).onchange = render; });
+  render();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

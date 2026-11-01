@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DTW 对齐</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+canvas { width:100%; border:1px solid var(--line); border-radius:8px; background:#fff; display:block; }
+#cv { height:260px; }
+#mat { width:220px; height:220px; }
+.wrap { display:grid; grid-template-columns:1fr 230px; gap:10px; align-items:start; }
+@media (max-width:640px) { .wrap { grid-template-columns:1fr; } #mat { width:100%; height:auto; aspect-ratio:1; } }
+.ctl { display:grid; grid-template-columns:130px 1fr 70px; gap:6px 10px; align-items:center; margin:8px 0; }
+</style>
+</head>
+<body>
+<h1>DTW 对齐：说得快慢不一样，也能对上</h1>
+<div class="sub">上面蓝线是模板（读一个词时某个特征随时间的变化，如 MFCC 的第 1 个系数），下面橙线是待识别的第 2 遍。拖动“语速”滑块让第 2 遍说快或说慢，比较两种对比方法的距离。</div>
+<div class="row">
+  <button id="m1" class="on">逐帧硬对比</button><button id="m2">DTW 对齐</button>
+  <span class="lbl" style="font-size:12px;color:var(--muted)">换一个词：</span>
+  <button id="w1" class="on">词 A</button><button id="w2">词 B（另一个词）</button>
+</div>
+<div class="wrap">
+  <canvas id="cv" width="900" height="260"></canvas>
+  <div><canvas id="mat" width="220" height="220"></canvas><div class="note">右图：横轴是模板的帧，纵轴是第 2 遍的帧，颜色越深两帧差别越大；红线是 DTW 找到的对齐路径；选“逐帧硬对比”时，蓝线是硬对比的对应关系。</div></div>
+</div>
+<div class="ctl">
+  <span>第 2 遍的语速</span><input type="range" id="sp" min="0.5" max="2" step="0.05" value="1.4"><span class="mono" id="spv"></span>
+  <span>开头多停顿</span><input type="range" id="pad" min="0" max="12" step="1" value="4"><span class="mono" id="padv"></span>
+</div>
+<table class="t"><tr><th></th><th>逐帧硬对比</th><th>DTW 对齐</th></tr>
+<tr><td>平均距离（越小越像）</td><td id="d1"></td><td id="d2"></td></tr></table>
+<div class="msg" id="msg"></div>
+<div class="note">“逐帧硬对比”把两段都拉成一样长再一帧对一帧比；DTW 允许一帧对多帧，自动找出总距离最小的对齐方式。实验 3-1 用的就是 DTW。</div>
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  var cv = $("cv"), ctx = cv.getContext("2d"), mc = $("mat"), mx = mc.getContext("2d");
+  var mode = 1, word = 1;
+  function shapeA(t) { return Math.sin(2 * Math.PI * t * 1.2) * Math.exp(-((t - 0.45) * (t - 0.45)) * 3) + 0.6 * Math.exp(-((t - 0.75) * (t - 0.75)) * 60); }
+  function shapeB(t) { return -0.8 * Math.exp(-((t - 0.3) * (t - 0.3)) * 40) + 0.7 * Math.sin(2 * Math.PI * t * 2.2) * Math.exp(-((t - 0.6) * (t - 0.6)) * 8); }
+  function seq(n, f, pad) { var a = []; for (var i = 0; i < pad; i++) a.push(0); for (var i = 0; i < n; i++) a.push(f(i / (n - 1))); return a; }
+  function dtw(a, b) {
+    var n = a.length, m = b.length, D = [], i, j;
+    for (i = 0; i < n; i++) { D.push([]); for (j = 0; j < m; j++) {
+      var c = Math.abs(a[i] - b[j]), best = Infinity;
+      if (i === 0 && j === 0) best = 0;
+      if (i > 0) best = Math.min(best, D[i - 1][j]);
+      if (j > 0) best = Math.min(best, D[i][j - 1]);
+      if (i > 0 && j > 0) best = Math.min(best, D[i - 1][j - 1]);
+      D[i].push(c + best); } }
+    var path = [[n - 1, m - 1]]; i = n - 1; j = m - 1;
+    while (i > 0 || j > 0) {
+      if (i === 0) j--; else if (j === 0) i--;
+      else { var x = D[i - 1][j - 1], y = D[i - 1][j], z = D[i][j - 1];
+        if (x <= y && x <= z) { i--; j--; } else if (y <= z) i--; else j--; }
+      path.push([i, j]); }
+    path.reverse();
+    return { D: D, path: path, dist: D[n - 1][m - 1] / path.length };
+  }
+  function render() {
+    var sp = +$("sp").value, pad = +$("pad").value;
+    $("spv").textContent = sp.toFixed(2) + " 倍"; $("padv").textContent = pad + " 帧";
+    var a = seq(40, shapeA, 0), fb = word === 1 ? shapeA : shapeB;
+    var b = seq(Math.max(8, Math.round(40 / sp)), fb, pad);
+    // 逐帧硬对比：把 b 线性拉伸到 a 的长度
+    var lin = 0, linPairs = [];
+    for (var i = 0; i < a.length; i++) { var j = Math.round(i / (a.length - 1) * (b.length - 1)); lin += Math.abs(a[i] - b[j]); linPairs.push([i, j]); }
+    lin /= a.length;
+    var r = dtw(a, b);
+    var pairs = mode === 1 ? linPairs : r.path;
+    var W = cv.width, H = cv.height, n = Math.max(a.length, b.length), dx = (W - 40) / (n - 1);
+    function xa(i) { return 20 + i * dx; } function ya(v) { return 70 - v * 45; } function yb(v) { return 200 - v * 45; }
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = "rgba(120,144,156,.35)"; ctx.lineWidth = 1;
+    pairs.forEach(function (p) { ctx.beginPath(); ctx.moveTo(xa(p[0]), ya(a[p[0]])); ctx.lineTo(xa(p[1]), yb(b[p[1]])); ctx.stroke(); });
+    function line(arr, fy, col) { ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.beginPath(); arr.forEach(function (v, i) { i ? ctx.lineTo(xa(i), fy(v)) : ctx.moveTo(xa(i), fy(v)); }); ctx.stroke();
+      ctx.fillStyle = col; arr.forEach(function (v, i) { ctx.beginPath(); ctx.arc(xa(i), fy(v), 2.5, 0, 7); ctx.fill(); }); }
+    line(a, ya, "#1e88e5"); line(b, yb, "#ef6c00");
+    ctx.fillStyle = "#263238"; ctx.font = "13px sans-serif";
+    ctx.fillText("模板：" + a.length + " 帧", 20, 14); ctx.fillText("第 2 遍：" + b.length + " 帧", 20, 252);
+    // 距离矩阵
+    var S = mc.width, cw = S / a.length, ch = S / b.length, maxc = 0;
+    for (var i = 0; i < a.length; i++) for (var j = 0; j < b.length; j++) maxc = Math.max(maxc, Math.abs(a[i] - b[j]));
+    for (var i = 0; i < a.length; i++) for (var j = 0; j < b.length; j++) {
+      var g = Math.round(255 - Math.abs(a[i] - b[j]) / maxc * 200); mx.fillStyle = "rgb(" + g + "," + g + "," + g + ")";
+      mx.fillRect(i * cw, S - (j + 1) * ch, cw + 0.5, ch + 0.5); }
+    function drawPath(ps, col) { mx.strokeStyle = col; mx.lineWidth = 2; mx.beginPath();
+      ps.forEach(function (p, k) { var x = (p[0] + 0.5) * cw, y = S - (p[1] + 0.5) * ch; k ? mx.lineTo(x, y) : mx.moveTo(x, y); }); mx.stroke(); }
+    if (mode === 1) drawPath(linPairs, "#1e88e5"); drawPath(r.path, "#e53935");
+    $("d1").textContent = lin.toFixed(3); $("d2").textContent = r.dist.toFixed(3);
+    $("d1").className = mode === 1 ? "big" : ""; $("d2").className = mode === 2 ? "big" : "";
+    var m = word === 1 ? "同一个词：DTW 距离 " + r.dist.toFixed(3) + "，比硬对比的 " + lin.toFixed(3) + (r.dist < lin * 0.7 ? " 小得多。DTW 把快慢和停顿的差别“吸收”掉了。" : " 小一些。")
+                       : "不同的词：即使用 DTW 对齐，距离也有 " + r.dist.toFixed(3) + "。把它和“词 A”的 DTW 距离比一比，距离小的那个模板就是识别结果。";
+    $("msg").textContent = m;
+  }
+  $("m1").onclick = function () { mode = 1; $("m1").className = "on"; $("m2").className = ""; render(); };
+  $("m2").onclick = function () { mode = 2; $("m2").className = "on"; $("m1").className = ""; render(); };
+  $("w1").onclick = function () { word = 1; $("w1").className = "on"; $("w2").className = ""; render(); };
+  $("w2").onclick = function () { word = 2; $("w2").className = "on"; $("w1").className = ""; render(); };
+  ["sp", "pad"].forEach(function (id) { $(id).oninput = render; });
+  render();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

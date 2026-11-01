@@ -56,6 +56,25 @@ description: 本书主要术语的中英文名称、简明定义和例子，按�
 
 | 术语 | 英文 | 定义 | 例子 |
 |---|---|---|---|
+| <span id="g-声学模型"></span>声学模型 | Acoustic Model | 识别系统中判断“这一小段声音像哪个音”的部分 | 给每一帧打分：像“sh”的可能性 0.8，像“s”的 0.15 |
+| <span id="g-语言模型"></span>语言模型 | Language Model | 判断一串文字通不通顺、出现的可能性有多大的模型 | 同音的“期中考试”和“其中考试”，靠语言模型选出前者 |
+| <span id="g-解码器"></span>解码器 | Decoder | 结合声学模型和语言模型的打分，在所有可能的文字中搜索最好的一句的部分 | 从几千条候选路径里找出总分最高的一句 |
+| <span id="g-词图"></span>词图 | Word Lattice | 解码时把各种可能的词连成的网状图，每条从头到尾的路径是一种候选句子 | “充电桩/充电装/冲点桩”是词图里的几条分支 |
+| <span id="g-模板匹配"></span>模板匹配 | Template Matching | 事先存好每个词的录音特征当模板，识别时和每个模板比较，最像的就是结果 | 早期的数字识别器 |
+| <span id="g-动态时间规整"></span>动态时间规整 | Dynamic Time Warping, DTW | 允许一帧对多帧，自动对齐两段快慢不同的语音并算出距离的方法 | 实验 3-1 用 DTW 比较数字录音的 MFCC |
+| <span id="g-隐马尔可夫模型"></span>隐马尔可夫模型 | Hidden Markov Model, HMM | 用看不见的“状态”一步步转移、每个状态发出可观察的声音来描述语音的统计模型 | 实验 3-2 给每个数字训练一个 5 状态 HMM |
+| <span id="g-高斯混合模型"></span>高斯混合模型 | Gaussian Mixture Model, GMM | 用几个“钟形曲线”叠加来描述一个状态会发出什么样的声音特征 | 传统识别中 HMM 每个状态配一个 GMM |
+| <span id="g-音素"></span>音素 | Phoneme | 语言中能区分意思的最小语音单位 | “bā”和“pā”的区别在音素 b 和 p |
+| <span id="g-声韵母"></span>声韵母 | Initial and Final | 汉语音节的声母和韵母，中文识别常用的建模单位 | “中”= 声母 zh + 韵母 ong |
+| <span id="g-混淆矩阵"></span>混淆矩阵 | Confusion Matrix | 行是真实类别、列是识别结果的表格，对角线是认对的，其他格子显示谁被认成了谁 | 实验 3-2 中 2 有 1 次被认成 0 |
+| <span id="g-端到端模型"></span>端到端模型 | End-to-End Model | 一个神经网络直接把声音变成文字，不再分成声学模型、发音词典、语言模型几个部件 | Whisper、Paraformer、SenseVoice |
+| <span id="g-CTC"></span>CTC | Connectionist Temporal Classification | 让模型逐帧输出字或空白，再合并重复、删掉空白得到文字的训练和解码方法 | “__你你_好好_”折叠成“你好” |
+| <span id="g-编码器—解码器"></span>编码器—解码器 | Encoder-Decoder | 先由编码器把整段声音“读懂”，再由解码器一个字一个字地写出文字的模型结构 | Whisper |
+| <span id="g-非自回归模型"></span>非自回归模型 | Non-autoregressive Model | 一次同时输出所有字，而不是一个接一个地输出，因此速度快 | Paraformer |
+| <span id="g-N-元语言模型"></span>N 元语言模型 | N-gram Language Model | 只看前面 N−1 个字（或词）来估计下一个字概率的语言模型 | 实验 3-4 的二元（2 元）语言模型 |
+| <span id="g-字错率"></span>字错率 | Character Error Rate, CER | (替换 + 删除 + 插入) ÷ 参考文本字数，中文识别的主要评价指标 | 7 个字错 2 个，字错率约 29% |
+| <span id="g-词错率"></span>词错率 | Word Error Rate, WER | 按词计算的错误率，英文等用空格分词的语言常用 | 5 个词错 2 个，词错率 40% |
+| <span id="g-实时率"></span>实时率 | Real-Time Factor, RTF | 处理用时 ÷ 音频时长，小于 1 表示比说话还快 | 61.8 秒录音用 3.3 秒识别完，RTF 约 0.05 |
 
 ## 第 4 章 语音识别实战：转写、字幕与唤醒
 

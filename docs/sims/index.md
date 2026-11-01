@@ -12,3 +12,6 @@ description: 本书配套的交互动画，可以在浏览器里直接操作，�
 | 第 1 章 | [语音对话流水线](speech-pipeline/index.md) | 点击五个环节，看输入、输出和耗时 |
 | 第 2 章 | [采样与量化](sampling-quantization/index.md) | 调频率、采样率、位深，看采样点、混叠和文件大小 |
 | 第 2 章 | [看见声音](spectrogram-viewer/index.md) | 切换八种声音，对照波形图和语谱图并播放 |
+| 第 3 章 | [DTW 对齐](dtw-align/index.md) | 调语速和停顿，比较逐帧硬对比和 DTW 对齐的距离 |
+| 第 3 章 | [CTC 折叠](ctc-collapse/index.md) | 一步步合并重复、删掉空白，把逐帧输出变成文字 |
+| 第 3 章 | [字错率计算器](cer-calculator/index.md) | 输入原文和识别结果，看替换、删除、插入和字错率 |

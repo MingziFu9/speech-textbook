@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CTC 折叠</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+.frames { display:flex; flex-wrap:wrap; gap:3px; margin:6px 0; }
+.fr { width:34px; text-align:center; border:1px solid var(--line); border-radius:5px; padding:4px 0; font-size:16px; background:#fff; transition:all .25s; }
+.fr small { display:block; font-size:10px; color:var(--muted); }
+.fr.blank { color:#b0bec5; }
+.fr.dup { background:#fff3e0; border-color:var(--warn); }
+.fr.gone { opacity:.25; }
+.fr.keep { background:var(--soft); border-color:var(--accent); }
+.step { font-size:13px; margin:10px 0 2px; font-weight:600; color:var(--accent); }
+.res { font-size:22px; font-weight:bold; letter-spacing:2px; }
+</style>
+</head>
+<body>
+<h1>CTC 折叠：逐帧输出怎样变成一句话</h1>
+<div class="sub">CTC 模型每 10—40 毫秒（一帧）输出一个字或一个“空白”（用 _ 表示）。把逐帧输出变成文字只要两步：① 合并连续重复的字；② 删掉空白。选一个例子，或者自己输入，按“下一步”。</div>
+<div class="row ex"><span class="lbl">例子：</span>
+  <button data-s="__你你你_好好__">你好</button>
+  <button data-s="_谢谢谢__谢谢_">谢谢</button>
+  <button data-s="_谢谢谢谢谢谢_">谢谢（没有空白隔开）</button>
+  <button data-s="__垃垃_圾圾_分_类类类__">垃圾分类</button>
+</div>
+<div class="row"><input type="text" id="inp" value="__你你你_好好__"><button class="main" id="go">从头开始</button><button id="next">下一步</button></div>
+<div class="step">逐帧输出（共 <span id="n"></span> 帧）</div>
+<div class="frames" id="f0"></div>
+<div id="s1" hidden><div class="step">第 ① 步：合并连续重复的字（橙色是被合并掉的重复）</div><div class="frames" id="f1"></div></div>
+<div id="s2" hidden><div class="step">第 ② 步：删掉空白 _</div><div class="frames" id="f2"></div></div>
+<div id="s3" hidden><div class="step">结果</div><div class="res" id="out"></div></div>
+<div class="msg" id="msg"></div>
+<div class="note">为什么需要“空白”？说话时一个字要持续好几帧，模型在每一帧都输出这个字，合并重复就能去掉多余的；但“谢谢”这样两个相同的字连在一起，如果中间没有空白隔开，就会被错误地合并成一个“谢”。空白就是 CTC 用来隔开相同字、表示“这一帧没有新字”的记号。</div>
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  var stage = 0, chars = [];
+  function box(c, cls, k) { return '<div class="fr ' + (cls || "") + (c === "_" ? " blank" : "") + '">' + c + '<small>' + k + '</small></div>'; }
+  function start() {
+    chars = Array.from($("inp").value.replace(/\s/g, "")).slice(0, 40); stage = 0;
+    $("n").textContent = chars.length;
+    $("f0").innerHTML = chars.map(function (c, i) { return box(c, "", i + 1); }).join("");
+    ["s1", "s2", "s3"].forEach(function (id) { $(id).hidden = true; });
+    $("msg").textContent = "共 " + chars.length + " 帧。按“下一步”合并重复。";
+  }
+  function next() {
+    stage++;
+    if (stage === 1) {
+      $("f1").innerHTML = chars.map(function (c, i) { return box(c, i > 0 && chars[i - 1] === c ? "dup gone" : "keep", i + 1); }).join("");
+      var merged = chars.filter(function (c, i) { return !(i > 0 && chars[i - 1] === c); });
+      $("s1").hidden = false; $("msg").textContent = "合并后剩下：" + merged.join(" ") + "（" + merged.length + " 个）。按“下一步”删掉空白。";
+    } else if (stage === 2) {
+      var merged = chars.filter(function (c, i) { return !(i > 0 && chars[i - 1] === c); });
+      $("f2").innerHTML = merged.map(function (c, i) { return box(c, c === "_" ? "gone" : "keep", ""); }).join("");
+      $("s2").hidden = false; $("msg").textContent = "按“下一步”看结果。";
+    } else if (stage >= 3) {
+      var out = chars.filter(function (c, i) { return !(i > 0 && chars[i - 1] === c); }).filter(function (c) { return c !== "_"; }).join("");
+      $("out").textContent = out || "（空）"; $("s3").hidden = false; stage = 3;
+      var m = chars.length + " 帧 → " + out.length + " 个字。";
+      if ($("inp").value.indexOf("谢谢谢谢") >= 0) m += " 本来想说“谢谢”，但两个“谢”之间没有空白，被合并成了一个。";
+      $("msg").textContent = m;
+    }
+  }
+  document.querySelectorAll(".ex button").forEach(function (b) { b.onclick = function () { $("inp").value = b.dataset.s; start(); }; });
+  $("go").onclick = start; $("next").onclick = next;
+  start();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>
