@@ -6,3 +6,6 @@ __pycache__/
 .ipynb_checkpoints/
 build/
 node_modules/
+labs/models/
+*.wav.tmp
+labs/ch*/out/

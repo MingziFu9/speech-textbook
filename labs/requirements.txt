@@ -1,8 +1,24 @@
-# 《课程名称》实验环境（写明教材编写时实测通过的版本，Python 3.11）
+# 《TTS、SST 与语音克隆的理论与应用》实验环境（编者 2026 年 11 月在 Python 3.12 上实测通过的版本，3.10–3.12 都可以）
 # 安装：pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-# 只列学生实验真正用到的库，版本号必须是编者实际运行过的；需要 GPU 的库单独写在下面并注明
-pandas
-numpy
-matplotlib
-scikit-learn
-jupyter
+# 版本号写“至少”，装更新的小版本一般也能运行；运行结果以教材正文为准，个别小数位可能略有不同
+sherpa-onnx>=1.12    # 编者用 2.0.1：识别、合成、唤醒、声纹、说话人日志、零样本克隆，全书主力
+numpy>=2.0           # 2.5.4
+soundfile>=0.12      # 0.14.0，读写 WAV / FLAC
+librosa>=0.10        # 1.0.0，重采样、语谱图、MFCC（第 2、3 章）
+matplotlib>=3.8      # 3.11.2，画波形图和语谱图
+scipy>=1.11          # 1.18.1
+pandas>=2.0          # 3.1.0，读结果表
+scikit-learn>=1.4    # 1.9.x，混淆矩阵（第 3 章）
+hmmlearn>=0.3        # 0.3.3，第 3 章 HMM 数字识别
+jieba>=0.42          # 0.42.1，第 5 章分词
+pypinyin>=0.50       # 0.55.0，第 5 章注音；第 4 章唤醒词转拼音
+sentencepiece>=0.2   # 0.2.2，第 4 章唤醒词（sherpa-onnx 的 text2token 要用）
+noisereduce>=3.0     # 3.0.3，第 2 章降噪
+gradio>=5.0          # 6.31.0，第 9 章网页小工具
+jupyter              # 想用 Notebook 时安装
+
+# ---- 以下按需安装，不在上面的一键安装里 ----
+# 第 6 章导出 MP3 需要 ffmpeg（系统软件，不是 Python 库）：Windows 从 https://ffmpeg.org 下载，或用 conda install ffmpeg
+# 第 7 章实验 7-4 语音转换 kNN-VC（选做，需要 PyTorch，模型约 1.3 GB）：
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+# 第 8 章实验 8-4 微调式克隆（GPT-SoVITS / CosyVoice）在云端 GPU 上按各项目说明安装

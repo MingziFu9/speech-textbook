@@ -1,8 +1,8 @@
 # 站点名、描述、网址和 nav 由 python tools/course.py sync 根据 course.yml 生成，请改 course.yml，不要手改这几项
-site_name: 课程名称
-site_description: 面向成人教育人工智能技术应用专业（专科）的《课程名称》教材，每章配套动手实验
-site_url: https://mingzifu9.github.io/ai-textbook-template/
-repo_url: https://github.com/MingziFu9/ai-textbook-template
+site_name: TTS、SST 与语音克隆的理论与应用
+site_description: 面向成人教育人工智能技术应用专业（专科）的《TTS、SST 与语音克隆的理论与应用》教材，9 章 36 个动手实验，识别、合成、声纹、克隆大多在普通电脑 CPU 上离线完成
+site_url: https://mingzifu9.github.io/speech-textbook/
+repo_url: https://github.com/MingziFu9/speech-textbook
 docs_dir: docs
 theme:
   name: material
@@ -37,15 +37,23 @@ extra_javascript:
 nav:
   - 首页: index.md
   - 课程描述: course-description.md
-  - "第 1 章 示例章": chapters/01-sample/index.md
+  - "第 1 章 走进语音技术": chapters/01-overview/index.md
+  - "第 2 章 声音的数字化与音频处理": chapters/02-audio/index.md
+  - "第 3 章 语音识别原理：从模板匹配到深度学习": chapters/03-asr-principles/index.md
+  - "第 4 章 语音识别实战：转写、字幕与唤醒": chapters/04-asr-practice/index.md
+  - "第 5 章 语音合成原理：从文字到声音": chapters/05-tts-principles/index.md
+  - "第 6 章 语音合成实战：多音色与有声书": chapters/06-tts-practice/index.md
+  - "第 7 章 声纹识别与语音转换": chapters/07-speaker/index.md
+  - "第 8 章 语音克隆：技术、伦理与授权": chapters/08-voice-cloning/index.md
+  - "第 9 章 语音交互应用与综合项目": chapters/09-applications/index.md
   - 交互动画:
     - sims/index.md
     - "示例动画：点击计数器": sims/example-counter/index.md
   - 学习图谱: learning-graph/index.md
   - 常见问题: faq/index.md
-  - 证书考点对照: certificate.md
+  - "在线模拟卷": mock-exam.md
   - 附录:
-    - "附录 A Python 速查": appendix/a-python.md
-    - "附录 B 工具库速查": appendix/b-libraries.md
-    - "附录 C 实验环境与数据说明": appendix/c-environment.md
-    - "附录 D 术语表": appendix/glossary.md
+    - "附录 A sherpa-onnx 与音频处理速查": appendix/a-libraries.md
+    - "附录 B 实验环境、模型与数据说明": appendix/b-environment.md
+    - "附录 C 术语表": appendix/glossary.md
+    - "附录 D 实验报告、声音授权书与项目模板": appendix/d-templates.md
