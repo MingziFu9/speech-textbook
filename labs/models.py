@@ -18,7 +18,7 @@ MODELS_DIR = Path(__file__).resolve().parent / "models"
 
 # 名称: (说明, 大约大小 MB, 用到的章, [下载地址（相对 BASE）……])
 MODELS = {
-    "matcha-zh": ("中文语音合成 Matcha-TTS（标贝女声）+ Vocos 声码器", 125, [1, 2, 3, 4, 5, 9],
+    "matcha-zh": ("中文语音合成 Matcha-TTS（标贝女声）+ Vocos 声码器", 125, [1, 2, 3, 4, 5, 6, 9],
                   ["tts-models/matcha-icefall-zh-baker.tar.bz2", "vocoder-models/vocos-22khz-univ.onnx"]),
     "hifigan": ("HiFi-GAN 声码器（第 5 章和 Vocos 对比）", 4, [5], ["vocoder-models/hifigan_v2.onnx"]),
     "vits-aishell3": ("中文多说话人合成 VITS（AISHELL-3，174 种音色）", 30, [4, 6, 7, 8],

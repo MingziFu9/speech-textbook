@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>音色与语速调台</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+.voices { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:8px 0; }
+@media (max-width:620px) { .voices { grid-template-columns:repeat(2,1fr); } }
+.voices button { padding:8px 6px; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer; font-size:13px; text-align:left; }
+.voices button.on { border-color:var(--accent); box-shadow:0 0 0 2px var(--soft); color:#222; background:#fff; font-weight:600; }
+.voices small { display:block; color:#777; }
+.speeds button { padding:6px 14px; margin-right:6px; border:1px solid var(--line); border-radius:16px; background:#fff; cursor:pointer; }
+.speeds button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+#spec { width:100%; height:110px; object-fit:fill; border-radius:6px; display:block; margin:8px 0 2px; background:#000; }
+.axis { display:flex; justify-content:space-between; font-size:11px; color:#888; }
+audio { width:100%; height:34px; margin-top:6px; }
+</style>
+</head>
+<body>
+<h1>音色与语速调台</h1>
+<div class="sub">同一句话“下周六上午九点，社区组织消防演练，欢迎参加。”，用 4 个模型的 6 种声音、3 种语速合成。选一个声音、一个语速，听一听，看语谱图有多长、平均音高是多少。</div>
+<div class="voices" id="voices"></div>
+<div class="speeds" id="speeds"></div>
+<img id="spec" alt="语谱图">
+<div class="axis"><span>0 秒</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7 秒</span></div>
+<audio id="player" controls preload="none"></audio>
+<table class="t"><tr><th>时长</th><th>平均音高</th><th>采样率</th><th>最高能记录的频率</th></tr>
+<tr><td id="c1"></td><td id="c2"></td><td id="c3"></td><td id="c4"></td></tr></table>
+<div class="msg" id="msg"></div>
+<div class="note">数据来自编者用 sherpa-onnx 实测（实验 6-1 的方法）。VITS 类模型每次合成都带一点随机性，同样的参数再合成一次，时长会差零点几秒。语谱图横轴固定为 7 秒，纵轴 0—8000 Hz。</div>
+<script>
+(function () {
+  var D = {"aishell3-10_0.8": {"dur": 5.42, "f0": 132, "sr": 8000}, "aishell3-10_1.0": {"dur": 4.11, "f0": 140, "sr": 8000}, "aishell3-10_1.3": {"dur": 3.73, "f0": 132, "sr": 8000}, "aishell3-50_0.8": {"dur": 5.24, "f0": 248, "sr": 8000}, "aishell3-50_1.0": {"dur": 4.48, "f0": 251, "sr": 8000}, "aishell3-50_1.3": {"dur": 3.7, "f0": 244, "sr": 8000}, "kokoro-20_0.8": {"dur": 7.65, "f0": 248, "sr": 24000}, "kokoro-20_1.0": {"dur": 5.75, "f0": 255, "sr": 24000}, "kokoro-20_1.3": {"dur": 4.23, "f0": 259, "sr": 24000}, "kokoro-65_0.8": {"dur": 7.73, "f0": 139, "sr": 24000}, "kokoro-65_1.0": {"dur": 5.97, "f0": 153, "sr": 24000}, "kokoro-65_1.3": {"dur": 4.36, "f0": 144, "sr": 24000}, "matcha_0.8": {"dur": 5.58, "f0": 290, "sr": 22050}, "matcha_1.0": {"dur": 4.45, "f0": 283, "sr": 22050}, "matcha_1.3": {"dur": 3.68, "f0": 294, "sr": 22050}, "melo_0.8": {"dur": 4.71, "f0": 247, "sr": 44100}, "melo_1.0": {"dur": 3.98, "f0": 245, "sr": 44100}, "melo_1.3": {"dur": 3.3, "f0": 248, "sr": 44100}};
+  var V = [
+    { id: "aishell3-10", name: "VITS AISHELL-3 · 10 号", tip: "男声，174 选 1" },
+    { id: "aishell3-50", name: "VITS AISHELL-3 · 50 号", tip: "女声，174 选 1" },
+    { id: "kokoro-20", name: "Kokoro · 20 号", tip: "女声，Apache-2.0" },
+    { id: "kokoro-65", name: "Kokoro · 65 号", tip: "男声，Apache-2.0" },
+    { id: "matcha", name: "Matcha 中文", tip: "女声，仅限学习研究" },
+    { id: "melo", name: "MeloTTS 中英", tip: "女声，能读英文" }
+  ];
+  var SP = [0.8, 1.0, 1.3], cur = { v: "kokoro-20", s: 1.0 };
+  function $(id) { return document.getElementById(id); }
+  $("voices").innerHTML = V.map(function (v) { return '<button data-v="' + v.id + '">' + v.name + '<small>' + v.tip + '</small></button>'; }).join("");
+  $("speeds").innerHTML = "语速：" + SP.map(function (s) { return '<button data-s="' + s + '">' + s.toFixed(1) + '</button>'; }).join("");
+  function render() {
+    var key = cur.v + "_" + cur.s.toFixed(1), d = D[key];
+    document.querySelectorAll("[data-v]").forEach(function (b) { b.classList.toggle("on", b.dataset.v === cur.v); });
+    document.querySelectorAll("[data-s]").forEach(function (b) { b.classList.toggle("on", +b.dataset.s === cur.s); });
+    $("spec").src = key + ".jpg"; $("player").src = key + ".mp3";
+    $("c1").textContent = d.dur.toFixed(2) + " 秒"; $("c2").textContent = d.f0 + " Hz";
+    $("c3").textContent = d.sr.toLocaleString() + " Hz"; $("c4").textContent = (d.sr / 2).toLocaleString() + " Hz";
+    var base = D[cur.v + "_1.0"], m = "和语速 1.0 相比，时长是它的 " + (d.dur / base.dur * 100).toFixed(0) + "%，平均音高几乎不变：语速只改快慢，不改音调。";
+    if (cur.s === 1.0) m = "这是正常语速。换成 0.8 或 1.3，看看语谱图变长还是变短。";
+    if (d.sr === 8000) m += " 注意：这个模型只输出 8000 Hz，语谱图 4000 Hz 以上是空的，听起来像电话声音。";
+    $("msg").textContent = m;
+  }
+  document.querySelectorAll("[data-v]").forEach(function (b) { b.onclick = function () { cur.v = b.dataset.v; render(); }; });
+  document.querySelectorAll("[data-s]").forEach(function (b) { b.onclick = function () { cur.s = +b.dataset.s; render(); }; });
+  render();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

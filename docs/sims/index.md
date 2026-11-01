@@ -18,3 +18,4 @@ description: 本书配套的交互动画，可以在浏览器里直接操作，�
 | 第 4 章 | [VAD 切句](vad-segment/index.md) | 调门槛和最短静音，看长录音被切成几句 |
 | 第 5 章 | [文本前端流水线](frontend-pipeline/index.md) | 一步步看正则化、分词、注音和停顿 |
 | 第 5 章 | [从频谱到声音](vocoder-compare/index.md) | 同一张频谱换三种声码器，听音质、比速度 |
+| 第 6 章 | [音色与语速调台](voice-speed/index.md) | 换 6 种声音、3 种语速，听音色、看时长和平均音高 |
