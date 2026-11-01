@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文本前端流水线</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+.stage { border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin-top:8px; opacity:.35; transition:opacity .3s; }
+.stage.on { opacity:1; }
+.stage h2 { font-size:13.5px; margin:0 0 4px; color:var(--accent); }
+.py { display:inline-flex; flex-direction:column; align-items:center; margin:2px 3px; }
+.py b { font-size:16px; } .py span { font-size:11px; color:var(--muted); font-family:Consolas,monospace; }
+.py.fix span { color:var(--warn); font-weight:bold; }
+mark { background:#fff3e0; padding:0 2px; border-radius:3px; }
+</style>
+</head>
+<body>
+<h1>文本前端流水线：文字怎样变成“发音说明书”</h1>
+<div class="sub">选一句话，按“下一步”依次看：① 文本正则化 → ② 分词 → ③ 注音（多音字、变调）→ ④ 韵律停顿。结果由实验 5-1 的前端程序算出。</div>
+<div class="row ex" id="ex"><span class="lbl">例句：</span></div>
+<div class="row"><button class="main" id="next">下一步</button><button id="reset">从头开始</button></div>
+<div class="stage on" id="s0"><h2>原文</h2><div id="t0"></div></div>
+<div class="stage" id="s1"><h2>① 文本正则化：数字、符号 → 汉字读法</h2><div id="t1"></div></div>
+<div class="stage" id="s2"><h2>② 分词</h2><div id="t2"></div></div>
+<div class="stage" id="s3"><h2>③ 注音（橙色是多音字或变调，需要特别处理）</h2><div id="t3"></div></div>
+<div class="stage" id="s4"><h2>④ 韵律停顿：#1 词间小停顿，#3 逗号处停顿，#4 句末</h2><div id="t4" class="mono"></div></div>
+<div class="msg" id="msg"></div>
+<div class="note">分词结果里有些切分并不理想（如“二零二 / 六年”“百分之十 / 二点五”），这是通用分词词典对数字读法不熟悉造成的，好在不影响注音。“一楼”被读成 yì lóu 是规则变调的错误（应读 yī lóu），实验 5-1 的思考题请你修正它。</div>
+<script>
+(function () {
+  var DATA = [{"text": "社区通知：2026-11-08上午9:30，在3号楼前举行活动。", "norm": "社区通知：二零二六年十一月八日上午九点三十分，在三号楼前举行活动。", "words": ["社区", "通知", "：", "二零二", "六年", "十一月", "八日上午", "九点", "三十分", "，", "在", "三号", "楼前", "举行", "活动", "。"], "pinyin": [["社", "she4"], ["区", "qu1"], ["通", "tong1"], ["知", "zhi1"], ["：", "："], ["二", "er4"], ["零", "ling2"], ["二", "er4"], ["六", "liu4"], ["年", "nian2"], ["十", "shi2"], ["一", "yi1"], ["月", "yue4"], ["八", "ba1"], ["日", "ri4"], ["上", "shang4"], ["午", "wu3"], ["九", "jiu3"], ["点", "dian3"], ["三", "san1"], ["十", "shi2"], ["分", "fen1"], ["，", "，"], ["在", "zai4"], ["三", "san1"], ["号", "hao4"], ["楼", "lou2"], ["前", "qian2"], ["举", "ju3"], ["行", "xing2"], ["活", "huo2"], ["动", "dong4"], ["。", "。"]], "prosody": "社区#1 通知#3 二零二#1 六年#1 十一月#1 八日上午#1 九点#1 三十分#3 在#1 三号#1 楼前#1 举行#1 活动#4"}, {"text": "请到一楼大厅找王大夫，银行的人也会来。", "norm": "请到一楼大厅找王大夫，银行的人也会来。", "words": ["请", "到", "一楼", "大厅", "找", "王大夫", "，", "银行", "的", "人", "也", "会", "来", "。"], "pinyin": [["请", "qing3"], ["到", "dao4"], ["一", "yi4"], ["楼", "lou2"], ["大", "da4"], ["厅", "ting1"], ["找", "zhao3"], ["王", "wang2"], ["大", "dai4"], ["夫", "fu"], ["，", "，"], ["银", "yin2"], ["行", "hang2"], ["的", "de"], ["人", "ren2"], ["也", "ye3"], ["会", "hui4"], ["来", "lai2"], ["。", "。"]], "prosody": "请#1 到#1 一楼#1 大厅#1 找#1 王大夫#3 银行#1 的#1 人#1 也#1 会#1 来#4"}, {"text": "报名电话13912345678，经费¥1500，比去年增加12.5%。", "norm": "报名电话幺三九幺二三四五六七八，经费一千五百元，比去年增加百分之十二点五。", "words": ["报名", "电话", "幺", "三九", "幺", "二", "三四", "五六", "七八", "，", "经费", "一千五百元", "，", "比", "去年", "增加", "百分之十", "二点五", "。"], "pinyin": [["报", "bao4"], ["名", "ming2"], ["电", "dian4"], ["话", "hua4"], ["幺", "yao1"], ["三", "san1"], ["九", "jiu3"], ["幺", "yao1"], ["二", "er4"], ["三", "san1"], ["四", "si4"], ["五", "wu3"], ["六", "liu4"], ["七", "qi1"], ["八", "ba1"], ["，", "，"], ["经", "jing1"], ["费", "fei4"], ["一", "yi4"], ["千", "qian1"], ["五", "wu3"], ["百", "bai3"], ["元", "yuan2"], ["，", "，"], ["比", "bi3"], ["去", "qu4"], ["年", "nian2"], ["增", "zeng1"], ["加", "jia1"], ["百", "bai3"], ["分", "fen1"], ["之", "zhi1"], ["十", "shi2"], ["二", "er4"], ["点", "dian3"], ["五", "wu3"], ["。", "。"]], "prosody": "报名#1 电话#1 幺#1 三九#1 幺#1 二#1 三四#1 五六#1 七八#3 经费#1 一千五百元#3 比#1 去年#1 增加#1 百分之十#1 二点五#4"}, {"text": "我们一起重新出发，不要错过这一天！", "norm": "我们一起重新出发，不要错过这一天！", "words": ["我们", "一起", "重新", "出发", "，", "不要", "错过", "这", "一天", "！"], "pinyin": [["我", "wo3"], ["们", "men"], ["一", "yi4"], ["起", "qi3"], ["重", "chong2"], ["新", "xin1"], ["出", "chu1"], ["发", "fa1"], ["，", "，"], ["不", "bu2"], ["要", "yao4"], ["错", "cuo4"], ["过", "guo4"], ["这", "zhe4"], ["一", "yi4"], ["天", "tian1"], ["！", "！"]], "prosody": "我们#1 一起#1 重新#1 出发#3 不要#1 错过#1 这#1 一天#4"}];
+  var SPECIAL = ["行", "重", "大", "夫", "一", "不", "乐", "长", "还", "和", "了", "着", "得", "觉", "单", "朝", "约", "幺"];
+  function $(id) { return document.getElementById(id); }
+  var cur = 0, step = 0;
+  function diff(a, b) { // 标出正则化改动的部分（简单做法：原文中的非汉字片段）
+    return a.replace(/[0-9¥%:\-.]+/g, function (m) { return "<mark>" + m + "</mark>"; });
+  }
+  function show() {
+    var d = DATA[cur];
+    $("t0").innerHTML = diff(d.text);
+    $("t1").innerHTML = step >= 1 ? d.norm : "";
+    $("t2").innerHTML = step >= 2 ? d.words.join(" / ") : "";
+    $("t3").innerHTML = step >= 3 ? d.pinyin.map(function (p) { var fix = SPECIAL.indexOf(p[0]) >= 0 && /[a-z]/.test(p[1]); return '<span class="py' + (fix ? " fix" : "") + '"><b>' + p[0] + '</b><span>' + (/[a-z]/.test(p[1]) ? p[1] : "") + '</span></span>'; }).join("") : "";
+    $("t4").textContent = step >= 4 ? d.prosody : "";
+    for (var i = 1; i <= 4; i++) $("s" + i).className = "stage" + (step >= i ? " on" : "");
+    var m = ["", "数字、日期、电话、金额、百分数按各自的规则读出来：年份和电话逐位读，金额按数值读，电话里的 1 读“幺”。",
+             "jieba 把句子切成词。词是注音和停顿的基础：多音字要看它在哪个词里。",
+             "pypinyin 按词注音，再用规则处理“一”“不”的变调；读错的词可以加进自定义词典。",
+             "合成模型根据这些停顿标记决定在哪里停、停多久。到这里，“发音说明书”就写好了，下一步交给声学模型。"][step];
+    $("msg").textContent = m;
+    $("next").disabled = step >= 4;
+  }
+  DATA.forEach(function (d, i) { var b = document.createElement("button"); b.textContent = "例句 " + (i + 1); b.onclick = function () { cur = i; step = 0; show(); }; $("ex").appendChild(b); });
+  $("next").onclick = function () { step = Math.min(4, step + 1); show(); };
+  $("reset").onclick = function () { step = 0; show(); };
+  show();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

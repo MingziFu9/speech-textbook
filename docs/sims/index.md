@@ -16,3 +16,5 @@ description: 本书配套的交互动画，可以在浏览器里直接操作，�
 | 第 3 章 | [CTC 折叠](ctc-collapse/index.md) | 一步步合并重复、删掉空白，把逐帧输出变成文字 |
 | 第 3 章 | [字错率计算器](cer-calculator/index.md) | 输入原文和识别结果，看替换、删除、插入和字错率 |
 | 第 4 章 | [VAD 切句](vad-segment/index.md) | 调门槛和最短静音，看长录音被切成几句 |
+| 第 5 章 | [文本前端流水线](frontend-pipeline/index.md) | 一步步看正则化、分词、注音和停顿 |
+| 第 5 章 | [从频谱到声音](vocoder-compare/index.md) | 同一张频谱换三种声码器，听音质、比速度 |

@@ -98,6 +98,18 @@ description: 本书主要术语的中英文名称、简明定义和例子，按�
 
 | 术语 | 英文 | 定义 | 例子 |
 |---|---|---|---|
+| <span id="g-文本前端"></span>文本前端 | Text Front-end | 语音合成中把文字转换成发音信息（读法、拼音、停顿）的部分 | 把“3号楼”变成“san1 hao4 lou2” |
+| <span id="g-文本正则化"></span>文本正则化 | Text Normalization, TN | 把数字、日期、符号等非汉字写法转换成实际的读法 | “¥1500”→“一千五百元” |
+| <span id="g-分词"></span>分词 | Word Segmentation | 把连续的汉字句子切分成一个个词 | “银行/的/工作人员” |
+| <span id="g-多音字"></span>多音字 | Polyphonic Character | 有两个或更多读音、要根据词语和上下文确定读音的字 | “行”在“银行”里读 háng，在“行走”里读 xíng |
+| <span id="g-变调"></span>变调 | Tone Sandhi | 字的声调在连读时发生变化的现象 | “一个”的“一”读 yí，“你好”的“你”读 ní |
+| <span id="g-韵律"></span>韵律 | Prosody | 说话时的停顿、轻重、快慢和语调，决定听起来自然不自然 | 逗号处停顿、疑问句句末上扬 |
+| <span id="g-声码器"></span>声码器 | Vocoder | 把梅尔频谱等声学特征转换成声音波形的模块 | HiFi-GAN、Vocos |
+| <span id="g-拼接合成"></span>拼接合成 | Concatenative Synthesis | 事先录好大量语音片段，合成时挑选合适的片段拼接起来的方法 | 早期的火车站报站系统 |
+| <span id="g-统计参数合成"></span>统计参数合成 | Statistical Parametric Synthesis | 用 HMM 等统计模型预测声音参数，再用程序生成声音的方法 | 2000 年代的手机朗读功能 |
+| <span id="g-神经网络语音合成"></span>神经网络语音合成 | Neural TTS | 用神经网络预测梅尔频谱并生成波形的合成方法 | Tacotron 2、FastSpeech 2、VITS、Matcha-TTS |
+| <span id="g-平均意见分"></span>平均意见分 | Mean Opinion Score, MOS | 请多人给语音按 1—5 分打分后取平均，评价合成语音自然度的主观指标 | 小组 6 人给 5 个版本打分 |
+| <span id="g-回识别字错率"></span>回识别字错率 | ASR-based CER | 把合成的语音交给识别模型，看识别结果和原文的字错率，用来检查读得对不对 | “请提前储水”回识别成“请提前出水” |
 
 ## 第 6 章 语音合成实战：多音色与有声书
 

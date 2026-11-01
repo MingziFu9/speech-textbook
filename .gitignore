@@ -9,3 +9,5 @@ node_modules/
 labs/models/
 *.wav.tmp
 labs/ch*/out/
+labs/ch0[5-9]/*.wav
+labs/ch0[5-9]/*.mp3

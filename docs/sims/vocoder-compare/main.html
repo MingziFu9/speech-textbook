@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从频谱到声音</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+.card { border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin-top:8px; }
+.card.on { border-color:var(--accent); box-shadow:0 0 0 2px var(--soft); }
+.card img { width:100%; height:90px; object-fit:fill; border-radius:4px; display:block; margin:6px 0; }
+.card h2 { font-size:14px; margin:0; }
+audio { width:100%; height:32px; }
+</style>
+</head>
+<body>
+<h1>从频谱到声音：同一张梅尔频谱，三种声码器</h1>
+<div class="sub">声学模型为“社区通知：本周六上午 9:30，在 3 号楼前举行垃圾分类宣传活动，欢迎居民参加”画出了一张梅尔频谱。下面三种声码器把这同一张频谱变成声音。戴上耳机听一听，再看语谱图和速度。</div>
+<div id="cards"></div>
+<div class="box"><h2>速度对比（编者笔记本 CPU，8.9 秒的语音）</h2><div id="bars"></div></div>
+<div class="note">数据来自实验 5-3 的实测。Griffin-Lim 是 1984 年提出的传统算法，不需要训练，靠反复迭代“猜”出相位，声音带有金属感、发虚；HiFi-GAN（2020）和 Vocos（2023）是神经网络声码器。三段录音已转成 MP3 以减小体积。</div>
+<script>
+(function () {
+  var V = [
+    { id: "vocos", name: "Vocos（神经网络，2023）", t: 0.091, desc: "先预测每一帧的频谱再逆变换，速度最快，音质清楚自然。本书 Matcha 默认用它。" },
+    { id: "hifigan", name: "HiFi-GAN（神经网络，2020）", t: 0.233, desc: "直接生成波形，音质好；这个模型用英文女声数据训练，中文也能用。" },
+    { id: "griffinlim", name: "Griffin-Lim（传统算法，1984）", t: 1.090, desc: "不用神经网络，迭代 32 次估计相位，最慢，声音发虚、有“金属感”和回声。" }
+  ];
+  var html = "";
+  V.forEach(function (v) {
+    html += '<div class="card" id="c-' + v.id + '"><h2>' + v.name + '</h2><img src="' + v.id + '.jpg" alt="' + v.name + ' 的语谱图"><audio controls preload="none" src="' + v.id + '.mp3"></audio><div class="note">' + v.desc + '</div></div>';
+  });
+  document.getElementById("cards").innerHTML = html;
+  var max = 1.2;
+  document.getElementById("bars").innerHTML = V.map(function (v) {
+    return '<div class="barrow"><span>' + v.id + '</span><div class="bar" style="width:' + (v.t / max * 100) + '%"></div><span class="v">' + v.t.toFixed(2) + ' 秒</span></div>';
+  }).join("");
+  document.querySelectorAll("audio").forEach(function (a) {
+    a.onplay = function () {
+      document.querySelectorAll("audio").forEach(function (b) { if (b !== a) b.pause(); });
+      document.querySelectorAll(".card").forEach(function (c) { c.classList.remove("on"); });
+      a.parentNode.classList.add("on");
+    };
+  });
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>
