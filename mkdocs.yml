@@ -58,6 +58,8 @@ nav:
     - "文本前端流水线": sims/frontend-pipeline/index.md
     - "从频谱到声音": sims/vocoder-compare/index.md
     - "音色与语速调台": sims/voice-speed/index.md
+    - "门槛与两种错误": sims/threshold-errors/index.md
+    - "声纹地图": sims/voiceprint-map/index.md
   - 学习图谱: learning-graph/index.md
   - 常见问题: faq/index.md
   - "在线模拟卷": mock-exam.md

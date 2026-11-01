@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>声纹地图</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+canvas { width:100%; height:380px; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:crosshair; }
+.legend span { display:inline-block; margin:2px 10px 2px 0; font-size:13px; }
+.legend i { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:4px; vertical-align:-1px; }
+label { font-size:13px; margin-right:12px; }
+</style>
+</head>
+<body>
+<h1>声纹地图：同一个人的录音聚在一起</h1>
+<div class="sub">每个点是一段录音的声纹向量（192 个数），这里把它“压扁”画到平面上。颜色相同的是同一个人。点一下任意一个点，看它是哪段录音、离它最近的是谁。</div>
+<div class="legend" id="legend"></div>
+<div><label><input type="checkbox" id="imp" checked> 显示 8 个“冒充者”（灰色）</label><label><input type="checkbox" id="unk" checked> 显示未知录音（★）</label></div>
+<canvas id="cv" width="900" height="380"></canvas>
+<div class="msg" id="msg">点一个点试试。</div>
+<div class="note">数据来自实验 7-1、7-2 的 45 段录音（全部是 Kokoro 合成的虚拟声音），用 CAM++ 模型提取声纹，再用主成分分析（PCA）投到平面上。192 维压到 2 维会丢掉很多信息（这两个方向只保留了约 36% 的差异），所以平面上挨得近不一定真的像；这里“最近的点”是按平面距离找的，真正判断是不是同一个人，要用 192 维的余弦相似度（实验 7-1）。</div>
+<script>
+(function () {
+  var P = [{"g": "A", "n": "volunteer_A_1", "x": -0.243, "y": -0.428}, {"g": "A", "n": "volunteer_A_2", "x": -0.315, "y": -0.453}, {"g": "A", "n": "volunteer_A_3", "x": -0.328, "y": -0.418}, {"g": "B", "n": "volunteer_B_1", "x": -0.435, "y": 0.467}, {"g": "B", "n": "volunteer_B_2", "x": -0.474, "y": 0.454}, {"g": "B", "n": "volunteer_B_3", "x": -0.435, "y": 0.525}, {"g": "C", "n": "volunteer_C_1", "x": 0.502, "y": 0.203}, {"g": "C", "n": "volunteer_C_2", "x": 0.512, "y": 0.23}, {"g": "C", "n": "volunteer_C_3", "x": 0.497, "y": 0.226}, {"g": "D", "n": "volunteer_D_1", "x": 0.278, "y": -0.251}, {"g": "D", "n": "volunteer_D_2", "x": 0.207, "y": -0.262}, {"g": "D", "n": "volunteer_D_3", "x": 0.17, "y": -0.223}, {"g": "A", "n": "genuine_A_1", "x": -0.318, "y": -0.424}, {"g": "A", "n": "genuine_A_2", "x": -0.26, "y": -0.363}, {"g": "A", "n": "genuine_A_3", "x": -0.251, "y": -0.496}, {"g": "A", "n": "genuine_A_4", "x": -0.419, "y": -0.439}, {"g": "B", "n": "genuine_B_1", "x": -0.454, "y": 0.468}, {"g": "B", "n": "genuine_B_2", "x": -0.335, "y": 0.497}, {"g": "B", "n": "genuine_B_3", "x": -0.431, "y": 0.327}, {"g": "B", "n": "genuine_B_4", "x": -0.433, "y": 0.444}, {"g": "C", "n": "genuine_C_1", "x": 0.503, "y": 0.226}, {"g": "C", "n": "genuine_C_2", "x": 0.487, "y": 0.183}, {"g": "C", "n": "genuine_C_3", "x": 0.472, "y": 0.152}, {"g": "C", "n": "genuine_C_4", "x": 0.525, "y": 0.129}, {"g": "D", "n": "genuine_D_1", "x": 0.211, "y": -0.261}, {"g": "D", "n": "genuine_D_2", "x": 0.199, "y": -0.244}, {"g": "D", "n": "genuine_D_3", "x": 0.244, "y": -0.279}, {"g": "D", "n": "genuine_D_4", "x": 0.255, "y": -0.349}, {"g": "冒充者100", "n": "impostor_100_1", "x": 0.146, "y": -0.075}, {"g": "冒充者100", "n": "impostor_100_2", "x": 0.16, "y": 0.008}, {"g": "冒充者10", "n": "impostor_10_1", "x": -0.088, "y": -0.2}, {"g": "冒充者10", "n": "impostor_10_2", "x": -0.066, "y": -0.188}, {"g": "冒充者30", "n": "impostor_30_1", "x": -0.238, "y": -0.118}, {"g": "冒充者30", "n": "impostor_30_2", "x": -0.241, "y": -0.112}, {"g": "冒充者50", "n": "impostor_50_1", "x": -0.298, "y": 0.166}, {"g": "冒充者50", "n": "impostor_50_2", "x": -0.321, "y": 0.157}, {"g": "冒充者55", "n": "impostor_55_1", "x": -0.219, "y": -0.08}, {"g": "冒充者55", "n": "impostor_55_2", "x": -0.201, "y": -0.037}, {"g": "冒充者60", "n": "impostor_60_1", "x": 0.198, "y": -0.046}, {"g": "冒充者60", "n": "impostor_60_2", "x": 0.147, "y": -0.017}, {"g": "冒充者75", "n": "impostor_75_1", "x": 0.17, "y": 0.301}, {"g": "冒充者75", "n": "impostor_75_2", "x": 0.123, "y": 0.322}, {"g": "冒充者95", "n": "impostor_95_1", "x": 0.148, "y": 0.029}, {"g": "冒充者95", "n": "impostor_95_2", "x": 0.178, "y": 0.051}, {"g": "?", "n": "unknown", "x": 0.469, "y": 0.198}];
+  var COL = { A: "#e53935", B: "#fb8c00", C: "#1e88e5", D: "#43a047" };
+  var cv = document.getElementById("cv"), ctx = cv.getContext("2d"), sel = -1;
+  document.getElementById("legend").innerHTML = ["A（女）", "B（女）", "C（男）", "D（男）"].map(function (t) {
+    return '<span><i style="background:' + COL[t[0]] + '"></i>志愿者 ' + t + '</span>'; }).join("") +
+    '<span><i style="background:#bbb"></i>冒充者</span><span>★ 未知录音</span>';
+  var xs = P.map(function (p) { return p.x; }), ys = P.map(function (p) { return p.y; });
+  var x0 = Math.min.apply(0, xs), x1 = Math.max.apply(0, xs), y0 = Math.min.apply(0, ys), y1 = Math.max.apply(0, ys);
+  function pos(p) { return [30 + (p.x - x0) / (x1 - x0) * (cv.width - 60), 20 + (y1 - p.y) / (y1 - y0) * (cv.height - 40)]; }
+  function visible(p) {
+    if (p.g.indexOf("冒充者") === 0) return document.getElementById("imp").checked;
+    if (p.g === "?") return document.getElementById("unk").checked;
+    return true;
+  }
+  function color(p) { return COL[p.g] || "#bbb"; }
+  function draw() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    P.forEach(function (p, i) {
+      if (!visible(p)) return;
+      var q = pos(p);
+      ctx.fillStyle = color(p);
+      if (p.g === "?") { ctx.font = "26px sans-serif"; ctx.fillStyle = "#6a1b9a"; ctx.fillText("★", q[0] - 10, q[1] + 9); }
+      else { ctx.beginPath(); ctx.arc(q[0], q[1], i === sel ? 9 : 6, 0, 7); ctx.fill(); }
+      if (i === sel) { ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(q[0], q[1], 12, 0, 7); ctx.stroke(); }
+    });
+  }
+  function name(p) {
+    if (p.g === "?") return "未知录音 unknown";
+    if (p.g.indexOf("冒充者") === 0) return "冒充者（Kokoro " + p.g.slice(3) + " 号音色）" + p.n;
+    return "志愿者 " + p.g + " 的录音 " + p.n;
+  }
+  cv.onclick = function (e) {
+    var r = cv.getBoundingClientRect(), mx = (e.clientX - r.left) * cv.width / r.width, my = (e.clientY - r.top) * cv.height / r.height;
+    var best = -1, bd = 1e9;
+    P.forEach(function (p, i) { if (!visible(p)) return; var q = pos(p), d = (q[0] - mx) * (q[0] - mx) + (q[1] - my) * (q[1] - my); if (d < bd) { bd = d; best = i; } });
+    if (best < 0 || bd > 400) return;
+    sel = best; draw();
+    var p = P[best], near = P.map(function (o, j) { return [j, -Math.hypot(o.x - p.x, o.y - p.y)]; })
+      .filter(function (a) { return a[0] !== best && visible(P[a[0]]); }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 3);
+    document.getElementById("msg").textContent = "选中：" + name(p) + "。平面上离它最近的三个点：" +
+      near.map(function (a) { return name(P[a[0]]); }).join("；") + "。";
+  };
+  ["imp", "unk"].forEach(function (id) { document.getElementById(id).onchange = draw; });
+  draw();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

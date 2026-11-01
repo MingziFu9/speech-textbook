@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>门槛与两种错误</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+canvas { width:100%; height:260px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+.ctl { display:grid; grid-template-columns:110px 1fr 70px; gap:6px 10px; align-items:center; margin:8px 0; }
+label { font-size:13px; margin-right:12px; }
+.big { font-size:20px; font-weight:600; }
+</style>
+</head>
+<body>
+<h1>门槛与两种错误：误接受和误拒绝此消彼长</h1>
+<div class="sub">绿色是“本人”测试的相似度分数，红色是“冒充者”的分数。分数高于门槛（黑色竖线）就放行。拖动门槛，看两种错误怎样变化；再切换成“电话音质”，看看本人的分数掉到哪里去了。</div>
+<div><label><input type="radio" name="cond" value="normal" checked> 正常录音</label><label><input type="radio" name="cond" value="phone"> 电话音质（8 kHz）</label></div>
+<canvas id="cv" width="900" height="260"></canvas>
+<div class="ctl"><span>门槛</span><input type="range" id="th" min="0" max="1" step="0.01" value="0.75"><span class="mono" id="thv"></span></div>
+<table class="t"><tr><th>误接受率 FAR<br>（冒充者被放行）</th><th>误拒绝率 FRR<br>（本人被拒绝）</th><th>本人平均分</th><th>冒充者平均分</th></tr>
+<tr><td class="big" id="far"></td><td class="big" id="frr"></td><td id="gm"></td><td id="im"></td></tr></table>
+<div class="msg" id="msg"></div>
+<div class="note">数据来自实验 7-2 的实测：4 位志愿者各注册 2 段录音，用 16 段本人录音和 16 段冒充者录音测试，每段录音分别和 4 个模板比较，共 16 次本人测试、112 次冒充测试。“电话音质”是把同样的测试录音降到 8 kHz 再升回来，模拟电话线路。</div>
+<script>
+(function () {
+  var D = {"genuine": [0.828, 0.931, 0.868, 0.84, 0.923, 0.907, 0.831, 0.897, 0.915, 0.936, 0.9, 0.883, 0.876, 0.925, 0.874, 0.84], "impostor": [0.354, 0.315, 0.367, 0.442, 0.441, 0.427, 0.276, 0.309, 0.347, 0.367, 0.2, 0.312, 0.37, 0.338, 0.326, 0.353, 0.428, 0.389, 0.438, 0.312, 0.332, 0.389, 0.346, 0.32, 0.362, 0.289, 0.393, 0.431, 0.351, 0.489, 0.428, 0.318, 0.453, 0.386, 0.273, 0.452, 0.368, 0.299, 0.401, 0.409, 0.381, 0.441, 0.405, 0.312, 0.442, 0.386, 0.227, 0.392, 0.593, 0.373, 0.421, 0.447, 0.523, 0.299, 0.373, 0.368, 0.532, 0.429, 0.338, 0.383, 0.631, 0.504, 0.41, 0.426, 0.397, 0.556, 0.302, 0.35, 0.465, 0.636, 0.336, 0.39, 0.444, 0.392, 0.268, 0.345, 0.416, 0.386, 0.291, 0.344, 0.367, 0.305, 0.518, 0.487, 0.403, 0.35, 0.513, 0.447, 0.292, 0.409, 0.56, 0.346, 0.349, 0.477, 0.591, 0.35, 0.348, 0.403, 0.466, 0.615, 0.376, 0.464, 0.536, 0.675, 0.336, 0.251, 0.365, 0.477, 0.328, 0.332, 0.436, 0.502], "phone_genuine": [0.523, 0.548, 0.487, 0.559, 0.559, 0.499, 0.481, 0.531, 0.703, 0.698, 0.644, 0.682, 0.645, 0.66, 0.632, 0.662], "phone_impostor": [0.227, 0.23, 0.222, 0.236, 0.272, 0.243, 0.213, 0.294, 0.276, 0.209, 0.182, 0.256, 0.206, 0.211, 0.197, 0.131, 0.209, 0.256, 0.328, 0.249, 0.278, 0.248, 0.249, 0.235, 0.279, 0.185, 0.349, 0.307, 0.177, 0.361, 0.254, 0.163, 0.371, 0.302, 0.146, 0.417, 0.226, 0.176, 0.318, 0.211, 0.209, 0.286, 0.261, 0.201, 0.346, 0.251, 0.123, 0.32, 0.417, 0.321, 0.336, 0.308, 0.372, 0.259, 0.269, 0.268, 0.352, 0.302, 0.278, 0.253, 0.393, 0.328, 0.304, 0.262, 0.19, 0.362, 0.168, 0.195, 0.178, 0.355, 0.192, 0.227, 0.3, 0.191, 0.123, 0.122, 0.221, 0.15, 0.15, 0.13, 0.297, 0.233, 0.468, 0.357, 0.314, 0.286, 0.439, 0.359, 0.158, 0.208, 0.42, 0.191, 0.194, 0.263, 0.394, 0.214, 0.204, 0.235, 0.31, 0.42, 0.221, 0.22, 0.284, 0.446, 0.204, 0.11, 0.235, 0.299, 0.195, 0.148, 0.245, 0.313]};
+  var cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  function data() {
+    var ph = document.querySelector("input[name=cond]:checked").value === "phone";
+    return { g: ph ? D.phone_genuine : D.genuine, i: ph ? D.phone_impostor : D.impostor };
+  }
+  function mean(a) { return a.reduce(function (s, x) { return s + x; }, 0) / a.length; }
+  function render() {
+    var th = +document.getElementById("th").value, d = data(), W = cv.width, H = cv.height, B = 50, lo = -0.2, hi = 1;
+    document.getElementById("thv").textContent = th.toFixed(2);
+    ctx.clearRect(0, 0, W, H);
+    function hist(a) { var h = new Array(B).fill(0); a.forEach(function (x) { var k = Math.floor((x - lo) / (hi - lo) * B); h[Math.max(0, Math.min(B - 1, k))]++; }); return h.map(function (c) { return c / a.length; }); }
+    var hg = hist(d.g), hi2 = hist(d.i), m = Math.max.apply(0, hg.concat(hi2)), bw = (W - 40) / B;
+    [[hi2, "rgba(229,57,53,0.55)"], [hg, "rgba(67,160,71,0.6)"]].forEach(function (z) {
+      ctx.fillStyle = z[1];
+      z[0].forEach(function (v, k) { var h = v / m * (H - 50); ctx.fillRect(20 + k * bw, H - 25 - h, bw - 1, h); });
+    });
+    ctx.fillStyle = "#555"; ctx.font = "12px sans-serif";
+    for (var t = -0.2; t <= 1.001; t += 0.2) { var x = 20 + (t - lo) / (hi - lo) * (W - 40); ctx.fillText(t.toFixed(1), x - 8, H - 8); }
+    var tx = 20 + (th - lo) / (hi - lo) * (W - 40);
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(tx, 10); ctx.lineTo(tx, H - 25); ctx.stroke();
+    ctx.fillStyle = "#e53935"; ctx.fillText("冒充者", 30, 20); ctx.fillStyle = "#43a047"; ctx.fillText("本人", 90, 20);
+    var far = d.i.filter(function (x) { return x >= th; }).length / d.i.length, frr = d.g.filter(function (x) { return x < th; }).length / d.g.length;
+    document.getElementById("far").textContent = (far * 100).toFixed(1) + "%";
+    document.getElementById("frr").textContent = (frr * 100).toFixed(1) + "%";
+    document.getElementById("gm").textContent = mean(d.g).toFixed(2); document.getElementById("im").textContent = mean(d.i).toFixed(2);
+    var msg;
+    if (far > 0.05) msg = "门槛太低：冒充者也能进门。银行、门禁这类场合绝对不能接受。";
+    else if (frr > 0.2) msg = "门槛太高：本人经常被拒之门外，用户会很烦。";
+    else if (far === 0 && frr === 0) msg = "这一段门槛下两种错误都是 0：本人和冒充者的分数完全分开了。真实环境里很少这么理想。";
+    else msg = "两种错误都比较低。门槛往哪边挪，取决于你更怕哪种错误。";
+    document.getElementById("msg").textContent = msg;
+  }
+  document.getElementById("th").oninput = render;
+  document.querySelectorAll("input[name=cond]").forEach(function (r) { r.onchange = render; });
+  render();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

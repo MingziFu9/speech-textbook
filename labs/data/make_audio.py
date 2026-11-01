@@ -206,9 +206,32 @@ def make_voices():
     write_csv(out / "voices.csv", rows, ["文件", "代号", "性别", "Kokoro 音色编号", "文字"])
 
 
+# ---------- 第 7 章：声纹登录测试（4 位授权人的新录音 + 8 个“冒充者”） ----------
+TEST_TEXTS = ["我想查询一下这个月的水电费。", "请帮我预约下周二的社区理发服务。",
+              "我家楼下的路灯不亮了。", "麻烦把议事会的纪要发我一份。"]
+IMPOSTORS = [10, 30, 50, 55, 60, 75, 95, 100]           # 不在 A—D 里的 Kokoro 音色，当作“冒充者”
+
+
+def make_speaker_test():
+    out = DATA / "speaker_test"
+    out.mkdir(exist_ok=True)
+    rows = []
+    for code, sid, _ in VOICES:
+        for k, text in enumerate(TEST_TEXTS, 1):
+            file = out / f"genuine_{code}_{k}.wav"
+            save_audio(file, say(text, sid), 16000)
+            rows.append([file.name, code, sid, text])
+    for sid in IMPOSTORS:
+        for k, text in enumerate(TEST_TEXTS[:2], 1):
+            file = out / f"impostor_{sid}_{k}.wav"
+            save_audio(file, say(text, sid), 16000)
+            rows.append([file.name, "冒充者", sid, text])
+    write_csv(out / "speaker_test.csv", rows, ["文件", "真实身份", "Kokoro 音色编号", "文字"])
+
+
 if __name__ == "__main__":
     only = sys.argv[1:]                       # 例如 python data/make_audio.py make_sounds 只重新生成第 2 章的声音
-    for f in (make_sounds, make_calls, make_meeting, make_kws, make_hotwords, make_voices):
+    for f in (make_sounds, make_calls, make_meeting, make_kws, make_hotwords, make_voices, make_speaker_test):
         if only and f.__name__ not in only:
             continue
         print("生成", f.__name__)
