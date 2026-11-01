@@ -9,4 +9,6 @@ description: 本书配套的交互动画，可以在浏览器里直接操作，�
 
 | 章 | 动画 | 你可以做什么 |
 |---|---|---|
-| 第 1 章 | [示例动画：点击计数器](example-counter/index.md) | 点“加一”和“清零”，看数字和柱子的变化（模板示例，写正文时替换） |
+| 第 1 章 | [语音对话流水线](speech-pipeline/index.md) | 点击五个环节，看输入、输出和耗时 |
+| 第 2 章 | [采样与量化](sampling-quantization/index.md) | 调频率、采样率、位深，看采样点、混叠和文件大小 |
+| 第 2 章 | [看见声音](spectrogram-viewer/index.md) | 切换八种声音，对照波形图和语谱图并播放 |

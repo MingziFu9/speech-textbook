@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>采样与量化</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+canvas { width:100%; height:240px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+.ctl { display:grid; grid-template-columns:150px 1fr 90px; gap:6px 10px; align-items:center; margin:8px 0; }
+@media (max-width:620px) { .ctl { grid-template-columns:110px 1fr 70px; } }
+</style>
+</head>
+<body>
+<h1>采样与量化：声音怎样变成一串数字</h1>
+<div class="sub">灰色曲线是真实的声波（截取 5 毫秒），蓝点是电脑记下的采样点，红色台阶是用这些数字还原出的声音。拖动滑块，看采样率和位深怎样影响还原效果。</div>
+<canvas id="cv" width="900" height="240"></canvas>
+<div class="ctl">
+  <span>声音频率</span><input type="range" id="f" min="100" max="6000" step="50" value="1000"><span class="mono" id="fv"></span>
+  <span>采样率</span><input type="range" id="sr" min="0" max="5" step="1" value="3"><span class="mono" id="srv"></span>
+  <span>位深（量化）</span><input type="range" id="b" min="2" max="16" step="1" value="4"><span class="mono" id="bv"></span>
+</div>
+<div class="msg" id="msg"></div>
+<table class="t"><tr><th>每秒数字个数</th><th>每个数字能取的值</th><th>最高能记录的频率</th><th>1 分钟单声道 WAV 大小</th></tr>
+<tr><td id="c1"></td><td id="c2"></td><td id="c3"></td><td id="c4"></td></tr></table>
+<div class="note">采样率决定“每秒拍多少张快照”，最高只能记录采样率一半以下的频率（采样定理）；位深决定“每张快照记得多精确”，位深越小，台阶越粗，听起来沙沙响。语音识别常用 16000 Hz、16 位。</div>
+<script>
+(function () {
+  var RATES = [2000, 4000, 8000, 16000, 22050, 44100];
+  var cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  function $(id) { return document.getElementById(id); }
+  function render() {
+    var f = +$("f").value, sr = RATES[+$("sr").value], bits = +$("b").value;
+    $("fv").textContent = f + " Hz"; $("srv").textContent = sr + " Hz"; $("bv").textContent = bits + " 位";
+    var W = cv.width, H = cv.height, T = 0.005, mid = H / 2, A = H * 0.4;
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = "#eee"; ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
+    ctx.strokeStyle = "#bbb"; ctx.lineWidth = 2; ctx.beginPath();
+    for (var x = 0; x <= W; x++) { var t = x / W * T, y = mid - A * Math.sin(2 * Math.PI * f * t); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke();
+    var levels = Math.pow(2, bits), n = Math.floor(T * sr), pts = [];
+    for (var i = 0; i <= n; i++) {
+      var t2 = i / sr, v = Math.sin(2 * Math.PI * f * t2);
+      var q = Math.round((v + 1) / 2 * (levels - 1)) / (levels - 1) * 2 - 1;
+      pts.push([t2 / T * W, mid - A * q]);
+    }
+    ctx.strokeStyle = "#e53935"; ctx.lineWidth = 1.5; ctx.beginPath();
+    pts.forEach(function (p, i) { if (!i) ctx.moveTo(p[0], p[1]); else { ctx.lineTo(p[0], pts[i - 1][1]); ctx.lineTo(p[0], p[1]); } });
+    if (pts.length) ctx.lineTo(W, pts[pts.length - 1][1]);
+    ctx.stroke();
+    ctx.fillStyle = "#1e88e5";
+    if (n < 400) pts.forEach(function (p) { ctx.beginPath(); ctx.arc(p[0], p[1], 3.5, 0, 7); ctx.fill(); });
+    $("c1").textContent = sr.toLocaleString(); $("c2").textContent = levels.toLocaleString() + " 种";
+    $("c3").textContent = (sr / 2).toLocaleString() + " Hz";
+    $("c4").textContent = (sr * bits / 8 * 60 / 1024 / 1024).toFixed(2) + " MB";
+    var m;
+    if (f > sr / 2) m = "⚠ 声音频率 " + f + " Hz 超过了采样率的一半（" + sr / 2 + " Hz）：采样点太稀，红线还原出的是一个更低的“假”声音，这叫混叠。";
+    else if (sr / f < 4) m = "采样点刚刚够：每个周期只有 " + (sr / f).toFixed(1) + " 个点，形状已经很粗糙。";
+    else m = "每个周期有 " + (sr / f).toFixed(1) + " 个采样点，形状能还原出来。";
+    if (bits <= 4) m += " 位深只有 " + bits + " 位，台阶明显，相当于给声音加了“量化噪声”。";
+    $("msg").textContent = m;
+  }
+  ["f", "sr", "b"].forEach(function (id) { $(id).oninput = render; });
+  render();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

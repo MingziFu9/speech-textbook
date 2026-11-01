@@ -45,11 +45,25 @@ def make_sounds():
     out = DATA / "sounds"
     out.mkdir(exist_ok=True)
     sr = 16000
-    for name, text in [("vowel_a", "啊"), ("vowel_i", "衣"), ("vowel_u", "乌")]:
-        s = say(text, sid=20, speed=0.4)
-        save_audio(out / f"{name}.wav", s, sr)
+    # 元音用“声源—滤波器”方法生成：声带振动（每秒 200 次的脉冲）经过口腔形状决定的几个共振峰
+    from scipy.signal import lfilter
+    formants = {"vowel_a": [(800, 80), (1200, 90), (2500, 120)],     # （共振峰频率 Hz，带宽 Hz）
+                "vowel_i": [(300, 50), (2300, 100), (3000, 120)],
+                "vowel_u": [(300, 50), (800, 80), (2300, 120)]}
+    n = int(1.2 * sr)
+    pitch = 200 + 20 * np.sin(np.linspace(0, np.pi, n))              # 音高在 200—220 Hz 之间轻微起伏
+    phase = np.cumsum(pitch) / sr
+    source = (np.diff(np.floor(phase), prepend=0) > 0).astype(float)  # 每个周期一个脉冲
+    for name, fs in formants.items():
+        y = source.copy()
+        for f, bw in fs:                                              # 每个共振峰是一个二阶共振滤波器
+            r = np.exp(-np.pi * bw / sr)
+            y = lfilter([1 - r], [1, -2 * r * np.cos(2 * np.pi * f / sr), r * r], y)
+        y = y * np.hanning(n) ** 0.3
+        save_audio(out / f"{name}.wav", 0.3 * y / np.abs(y).max(), sr)
     t = np.arange(int(1.5 * sr)) / sr
-    whistle = 0.3 * np.sin(2 * np.pi * (1800 + 200 * np.sin(2 * np.pi * 2 * t)) * t)  # 口哨：一个上下滑动的高音
+    freq = 1800 + 200 * np.sin(2 * np.pi * 2 * t)                # 口哨：音高在 1600—2000 Hz 之间上下滑动
+    whistle = 0.3 * np.sin(2 * np.pi * np.cumsum(freq) / sr)
     save_audio(out / "whistle.wav", whistle * np.hanning(len(t)), sr)
     save_audio(out / "noise.wav", 0.1 * rng.standard_normal(len(t)).astype(np.float32), sr)
     knock = np.zeros(len(t), np.float32)
@@ -176,7 +190,10 @@ def make_voices():
 
 
 if __name__ == "__main__":
+    only = sys.argv[1:]                       # 例如 python data/make_audio.py make_sounds 只重新生成第 2 章的声音
     for f in (make_sounds, make_calls, make_meeting, make_kws, make_voices):
+        if only and f.__name__ not in only:
+            continue
         print("生成", f.__name__)
         f()
     print("完成")
