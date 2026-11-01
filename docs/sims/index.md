@@ -21,3 +21,5 @@ description: 本书配套的交互动画，可以在浏览器里直接操作，�
 | 第 6 章 | [音色与语速调台](voice-speed/index.md) | 换 6 种声音、3 种语速，听音色、看时长和平均音高 |
 | 第 7 章 | [声纹地图](voiceprint-map/index.md) | 45 段录音的声纹投到平面上，看同一个人聚在一起 |
 | 第 7 章 | [门槛与两种错误](threshold-errors/index.md) | 拖动门槛看误接受和误拒绝，切换电话音质 |
+| 第 8 章 | [这样克隆合规吗](clone-compliance/index.md) | 10 个克隆情境判断，看答案和依据条款 |
+| 第 8 章 | [参考时长与相似度](clone-settings/index.md) | 改参考音长度和生成步数，听克隆结果、比相似度 |

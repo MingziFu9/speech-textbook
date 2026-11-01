@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>参考时长与相似度</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+.tabs button { padding:6px 14px; margin:0 6px 6px 0; border:1px solid var(--line); border-radius:16px; background:#fff; cursor:pointer; }
+.tabs button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+.row { display:grid; grid-template-columns:120px 1fr; gap:6px 10px; align-items:center; margin:6px 0; }
+.row audio { width:100%; height:32px; }
+.bars { margin-top:8px; }
+.ref { font-size:13px; color:#666; }
+input[type=range] { width:100%; }
+</style>
+</head>
+<body>
+<h1>参考时长与相似度：克隆需要多少秒？</h1>
+<div class="sub">用虚拟授权人 B 的参考音，克隆朗读“各位居民请注意，本周六上午九点，社区卫生服务站提供免费量血压服务。”拖动滑块换参考音长度或生成步数，听结果，看它和 B 的真实录音有多像。</div>
+<div class="tabs"><button data-m="len" class="on">改参考时长</button><button data-m="steps">改生成步数</button></div>
+<div class="row"><span id="lab">参考时长</span><input type="range" id="sl" min="0" max="3" step="1" value="0"></div>
+<div class="row"><span>参考音</span><div><audio id="ra" controls preload="none"></audio><div class="ref" id="rt"></div></div></div>
+<div class="row"><span>克隆结果</span><audio id="ca" controls preload="none"></audio></div>
+<div class="row"><span>B 的真实录音</span><audio controls preload="none" src="real_B.mp3"></audio></div>
+<div class="box bars" id="bars"></div>
+<div class="msg" id="msg"></div>
+<div class="note">数据来自实验 8-2 的实测（ZipVoice int8 模型，编者笔记本 CPU）。“像 B”是克隆结果和 B 另一段没参与克隆的录音的声纹相似度；作为对照，第 7 章中 B 本人两段录音的相似度约 0.9，不同人之间约 0.3—0.5。所有声音都是合成的虚拟声音。</div>
+<script>
+(function () {
+  var LEN = [
+    { name: "约 3 秒", file: "clone_ref_B_3s", ref: "ref_B_3s.mp3", text: "大家好，我是社区志愿者。（2.8 秒）", b: 0.70, o: 0.42, rtf: 0.50 },
+    { name: "约 6 秒", file: "clone_ref_B_6s", ref: null, text: "大家好，我是社区志愿者，平时负责每周的社区广播。（5.8 秒）", b: 0.68, o: 0.43, rtf: 0.80 },
+    { name: "约 9 秒", file: "clone_volunteer_B_1", ref: null, text: "大家好，我是社区志愿者，平时负责每周的社区广播和活动通知，很高兴为大家服务。（9.3 秒）", b: 0.68, o: 0.37, rtf: 1.25 },
+    { name: "约 14 秒", file: "clone_ref_B_15s", ref: "ref_B_15s.mp3", text: "……今天天气不错，我们组织了几位老人去公园散步，大家都很开心。（14.2 秒）", b: 0.71, o: 0.39, rtf: 1.81 }
+  ];
+  var ST = [1, 2, 4, 8, 16].map(function (s, i) {
+    return { name: s + " 步", file: "clone_steps" + s, ref: null, text: "参考音固定为约 9 秒的那段", b: [0.17, 0.59, 0.66, 0.60, 0.59][i], o: [0.10, 0.33, 0.38, 0.33, 0.27][i], rtf: [0.30, 0.60, 1.09, 2.24, 4.51][i], cer: [23, 0, 0, 0, 0][i] };
+  });
+  var mode = "len";
+  function $(id) { return document.getElementById(id); }
+  function bar(label, v, max, unit, color) {
+    return '<div class="barrow"><span>' + label + '</span><div class="bar" style="width:' + Math.max(2, v / max * 100) + '%;background:' + color + '"></div><span class="v">' + v.toFixed(2) + unit + '</span></div>';
+  }
+  function render() {
+    var L = mode === "len" ? LEN : ST, k = +$("sl").value, d = L[k];
+    $("sl").max = L.length - 1;
+    $("lab").textContent = (mode === "len" ? "参考时长：" : "生成步数：") + d.name;
+    $("ca").src = d.file + ".mp3";
+    if (d.ref) { $("ra").style.display = ""; $("ra").src = d.ref; } else { $("ra").style.display = "none"; }
+    $("rt").textContent = d.text;
+    $("bars").innerHTML = bar("像 B", d.b, 1, "", "#1e88e5") + bar("像别人(最高)", d.o, 1, "", "#bbb") + bar("实时率", d.rtf, 5, "", "#fb8c00");
+    var m;
+    if (mode === "len") m = k === 0 ? "只用 3 秒参考音，相似度就有 0.70，已经和更长的参考音差不多。这正是零样本克隆让人担心的地方：一条短语音消息就够了。" : "参考音变长，相似度变化不大，但合成更慢（参考音也要参与计算）。对这几段干净的合成声音，几秒就够；真人录音有噪声、口音时，长一点更稳定。";
+    else m = d.cer ? "只走 1 步，声音模糊，相似度只有 0.17，还漏读了字（字错率 23%）。" : (k === 1 ? "2 步就基本可用，速度最快。" : "步数再增加，相似度并没有更高，速度却成倍变慢。默认 4 步是一个折中。");
+    $("msg").textContent = m;
+  }
+  document.querySelectorAll("[data-m]").forEach(function (b) {
+    b.onclick = function () { mode = b.dataset.m; document.querySelectorAll("[data-m]").forEach(function (x) { x.classList.toggle("on", x === b); }); $("sl").value = mode === "len" ? 0 : 2; render(); };
+  });
+  $("sl").oninput = render;
+  render();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

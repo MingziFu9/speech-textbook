@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>这样克隆合规吗</title>
+<link rel="stylesheet" href="../common/sim.css">
+<style>
+.q { border:1px solid var(--line); border-radius:8px; padding:12px; margin:8px 0; }
+.q h2 { font-size:15px; margin:0 0 8px; line-height:1.6; }
+.opts button { padding:6px 12px; margin:0 6px 6px 0; border:1px solid var(--line); border-radius:16px; background:#fff; cursor:pointer; font-size:13px; }
+.opts button.right { background:#e8f5e9; border-color:#43a047; }
+.opts button.wrong { background:#ffebee; border-color:#e53935; }
+.why { display:none; font-size:13px; line-height:1.7; background:#fafafa; border-left:3px solid var(--accent); padding:6px 10px; margin-top:6px; }
+.nav { display:flex; justify-content:space-between; align-items:center; }
+.nav button { padding:6px 14px; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer; }
+</style>
+</head>
+<body>
+<h1>这样克隆合规吗？10 个情境判断</h1>
+<div class="sub">读每个情境，选择“合规”“有条件可以”或“不合规”，马上看到答案和依据。本页只用于学习，不构成法律意见。</div>
+<div class="nav"><button id="prev">上一题</button><span class="mono" id="pos"></span><button id="next">下一题</button></div>
+<div id="box"></div>
+<div class="msg" id="score"></div>
+<script>
+(function () {
+  var Q = [
+    ["小林用自己的声音（已填写授权书，授权给自己的课程作业）克隆了一段社区广播，作业里注明“AI 合成”。", 0,
+     "本人同意、用途明确、作品有标识。注意授权只覆盖课程作业，如果以后要商用或公开发布，需要另行考虑。"],
+    ["某网店从明星的直播视频里截取声音，克隆后用“明星的声音”为自家产品做广告。", 2,
+     "未经许可使用他人声音，侵犯声音权益（《民法典》第一千零二十三条：对自然人声音的保护，参照适用肖像权保护的有关规定）；还可能构成虚假宣传。公众人物的声音同样受保护。"],
+    ["小王用奶奶生前的录音克隆了她的声音，只在家里放给家人听，作为怀念。", 1,
+     "家庭内部的私人怀念一般问题不大，但最好先和其他近亲属商量（《民法典》第九百九十四条规定近亲属可以保护逝者的人格利益）；不要公开传播，更不能用于商业或冒充。"],
+    ["一家配音公司和配音演员签过合同，拥有他录音作品的著作权，于是把他的声音做成 AI 音色在平台上出售。", 2,
+     "拥有录音制品的著作权，不等于获得了把声音 AI 化的授权。2024 年北京互联网法院“AI 声音侵权案”中，法院认定此类行为侵犯声音权益，判赔 25 万元。"],
+    ["几个同学用班里一位同学的声音克隆了一段搞笑的话，没告诉他就发到了班级群。", 2,
+     "未经本人同意使用他人声音，侵犯声音权益；内容不当还可能侵犯名誉权。深度合成规定要求提供人声编辑功能的服务提示使用者告知被编辑的个人并取得其单独同意。"],
+    ["有声书平台取得了主播的书面授权（写明用途、期限、可以商用），用克隆的声音录制新书，每本书开头都提示“本音频由人工智能合成”。", 0,
+     "授权清楚、标识到位，是正当用途。授权书要写明撤回方式，主播撤回后应停止使用并删除模型。"],
+    ["有人克隆了公司领导的声音，打电话给财务人员，要求紧急转账。", 2,
+     "这是冒充他人实施诈骗，属于违法犯罪行为。个人防范：涉及转账一律回拨确认。"],
+    ["一位渐冻症患者在还能说话时录下声音，授权医院为他做专属语音合成，以后用来和家人交流。", 0,
+     "本人知情并单独同意（《个人信息保护法》第二十九条），目的正当，是语音克隆最有意义的用途之一。数据要严格保护。"],
+    ["学生用书里“虚拟授权人”的声音完成实验，发到短视频平台时，把开头的“AI 合成”提示剪掉了。", 2,
+     "《人工智能生成合成内容标识办法》第十条：用户发布生成合成内容应主动声明，任何组织和个人不得恶意删除、篡改、伪造、隐匿标识。虚拟声音也要标识。"],
+    ["客服中心用客户的通话录音提取声纹，建立“声纹库”用来识别老客户，但没有告诉客户。", 2,
+     "声纹是生物识别信息，属于敏感个人信息（《个人信息保护法》第二十八条），处理需取得个人单独同意（第二十九条）。"]
+  ];
+  var OPT = ["合规", "有条件可以", "不合规"], cur = 0, got = {};
+  function $(id) { return document.getElementById(id); }
+  function render() {
+    var q = Q[cur];
+    $("pos").textContent = "第 " + (cur + 1) + " / " + Q.length + " 题";
+    $("box").innerHTML = '<div class="q"><h2>' + q[0] + '</h2><div class="opts">' +
+      OPT.map(function (o, i) { return '<button data-i="' + i + '">' + o + '</button>'; }).join("") +
+      '</div><div class="why" id="why"><b>答案：' + OPT[q[1]] + '。</b>' + q[2] + '</div></div>';
+    document.querySelectorAll("[data-i]").forEach(function (b) {
+      b.onclick = function () {
+        var i = +b.dataset.i;
+        if (!(cur in got)) got[cur] = i === q[1];
+        document.querySelectorAll("[data-i]").forEach(function (x) { var j = +x.dataset.i; x.className = j === q[1] ? "right" : (j === i ? "wrong" : ""); });
+        $("why").style.display = "block";
+        var n = Object.keys(got).length, r = Object.keys(got).filter(function (k) { return got[k]; }).length;
+        $("score").textContent = "已答 " + n + " 题，第一次就答对 " + r + " 题。";
+      };
+    });
+  }
+  $("prev").onclick = function () { cur = (cur + Q.length - 1) % Q.length; render(); };
+  $("next").onclick = function () { cur = (cur + 1) % Q.length; render(); };
+  render();
+})();
+</script>
+<script src="../common/sim.js"></script>
+</body>
+</html>

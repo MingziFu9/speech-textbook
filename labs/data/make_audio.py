@@ -229,9 +229,27 @@ def make_speaker_test():
     write_csv(out / "speaker_test.csv", rows, ["文件", "真实身份", "Kokoro 音色编号", "文字"])
 
 
+# ---------- 第 8 章：不同长度的参考音（虚拟授权人 B），测参考时长对克隆的影响 ----------
+REF_TEXTS = {
+    "3s": "大家好，我是社区志愿者。",
+    "6s": "大家好，我是社区志愿者，平时负责每周的社区广播。",
+    "15s": "大家好，我是社区志愿者，平时负责每周的社区广播和活动通知。今天天气不错，我们组织了几位老人去公园散步，大家都很开心。",
+}
+
+
+def make_ref_lengths():
+    out = DATA / "voices"
+    rows = []
+    for tag, text in REF_TEXTS.items():
+        s, sr = speak(text, model="kokoro", sid=45)
+        save_audio(out / f"ref_B_{tag}.wav", s, sr)
+        rows.append([f"ref_B_{tag}.wav", f"{len(s) / sr:.1f}", text])
+    write_csv(out / "ref_lengths.csv", rows, ["文件", "时长秒", "文字"])
+
+
 if __name__ == "__main__":
     only = sys.argv[1:]                       # 例如 python data/make_audio.py make_sounds 只重新生成第 2 章的声音
-    for f in (make_sounds, make_calls, make_meeting, make_kws, make_hotwords, make_voices, make_speaker_test):
+    for f in (make_sounds, make_calls, make_meeting, make_kws, make_hotwords, make_voices, make_speaker_test, make_ref_lengths):
         if only and f.__name__ not in only:
             continue
         print("生成", f.__name__)

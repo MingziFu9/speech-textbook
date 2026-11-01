@@ -54,7 +54,7 @@
 | [第 5 章 语音合成原理：从文字到声音](chapters/05-tts-principles/index.md) | 实验 5-1 ★ 做一个文本前端<br>实验 5-2 ★ 拼接合成听“机器腔”<br>实验 5-3 ★ 拆开看声学模型和声码器<br>实验 5-4 ☆ 给合成打分 |
 | [第 6 章 语音合成实战：多音色与有声书](chapters/06-tts-practice/index.md) | 实验 6-1 ★ 一个模型多种声音<br>实验 6-2 ★ 中英混读<br>实验 6-3 ★ 社区有声广播<br>实验 6-4 ☆ 云平台合成接口（待实测） |
 | [第 7 章 声纹识别与语音转换](chapters/07-speaker/index.md) | 实验 7-1 ★ 声纹比一比<br>实验 7-2 ★ 声纹登录<br>实验 7-3 ★ 谁在说话<br>实验 7-4 ☆ 语音转换体验（待实测） |
-| [第 8 章 语音克隆：技术、伦理与授权](chapters/08-voice-cloning/index.md) | 实验 8-1 ★ 实验名称<br>实验 8-2 ★ 实验名称<br>实验 8-3 ★ 实验名称<br>实验 8-4 ★ 实验名称 |
+| [第 8 章 语音克隆：技术、伦理与授权](chapters/08-voice-cloning/index.md) | 实验 8-1 ★ 签授权书，录参考音<br>实验 8-2 ★ 零样本克隆<br>实验 8-3 ★ 克隆像不像，并贴上标签<br>实验 8-4 ☆ 微调式克隆（待实测） |
 | [第 9 章 语音交互应用与综合项目](chapters/09-applications/index.md) | 实验 9-1 ★ 实验名称<br>实验 9-2 ★ 实验名称<br>实验 9-3 ★ 实验名称<br>实验 9-4 ★ 实验名称 |
 
 附录：[A sherpa-onnx 与音频处理速查](appendix/a-libraries.md) · [B 实验环境、模型与数据说明](appendix/b-environment.md) · [C 术语表](appendix/glossary.md) · [D 实验报告、声音授权书与项目模板](appendix/d-templates.md)
