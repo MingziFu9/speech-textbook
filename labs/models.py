@@ -3,7 +3,7 @@
 用法（在 labs 文件夹里运行）：
     python models.py              # 列出全部模型、大小、哪几章用、是否已下载
     python models.py ch01         # 下载第 1 章用到的模型
-    python models.py all          # 下载全部模型（约 1.1 GB）
+    python models.py all          # 下载全部模型（约 1.6 GB）
     python models.py matcha-zh    # 只下载某一个模型
 
 模型保存在 labs/models/ 下，每个模型一个文件夹。下载慢或下载失败，见附录 B“模型下载不了怎么办”。
@@ -33,8 +33,8 @@ MODELS = {
     "paraformer-zh": ("中文语音识别 Paraformer（small）", 75, [4],
                       ["asr-models/sherpa-onnx-paraformer-zh-small-2024-03-09.tar.bz2"]),
     "whisper-tiny": ("多语种语音识别 Whisper tiny", 110, [4], ["asr-models/sherpa-onnx-whisper-tiny.tar.bz2"]),
-    "streaming-zh": ("中文流式语音识别 Zipformer CTC（int8，边说边出字）", 20, [4],
-                     ["asr-models/sherpa-onnx-streaming-zipformer-small-ctc-zh-int8-2025-04-01.tar.bz2"]),
+    "streaming-zh": ("中文流式识别 Zipformer（14M，边说边出字，支持热词）", 74, [4],
+                     ["asr-models/sherpa-onnx-streaming-zipformer-zh-14M-2023-02-23.tar.bz2"]),
     "vad": ("语音活动检测 Silero VAD", 1, [4, 7, 9], ["asr-models/silero_vad.onnx"]),
     "kws": ("关键词唤醒 Zipformer（WenetSpeech，3.3M）", 31, [4, 9],
             ["kws-models/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01.tar.bz2"]),

@@ -162,6 +162,23 @@ def make_kws():
     write_csv(out / "kws.csv", rows, ["文件", "文字", "含唤醒词"])
 
 
+# ---------- 第 4 章：带地名、人名的来电（测试热词） ----------
+HOTWORD_TEXTS = ["请到幸福里社区邻里汇找韦嘉怡登记。",
+                 "鲁班路三十七弄的居民请到樟树苑集合。",
+                 "社区新开了一家栖霞书屋，欢迎大家去看书。"]
+
+
+def make_hotwords():
+    out = DATA / "hotwords"
+    out.mkdir(exist_ok=True)
+    rows = []
+    for k, text in enumerate(HOTWORD_TEXTS, 1):
+        file = out / f"hot_{k}.wav"
+        save_audio(file, say(text, 20), 16000)
+        rows.append([file.name, text])
+    write_csv(out / "hotwords.csv", rows, ["文件", "文字"])
+
+
 # ---------- 第 7、8 章：虚拟授权人（声纹、克隆用） ----------
 VOICES = [  # 代号, 音色, 性别
     ("A", 20, "女"), ("B", 45, "女"), ("C", 65, "男"), ("D", 85, "男")]
@@ -191,7 +208,7 @@ def make_voices():
 
 if __name__ == "__main__":
     only = sys.argv[1:]                       # 例如 python data/make_audio.py make_sounds 只重新生成第 2 章的声音
-    for f in (make_sounds, make_calls, make_meeting, make_kws, make_voices):
+    for f in (make_sounds, make_calls, make_meeting, make_kws, make_hotwords, make_voices):
         if only and f.__name__ not in only:
             continue
         print("生成", f.__name__)

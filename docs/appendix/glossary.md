@@ -80,6 +80,19 @@ description: 本书主要术语的中英文名称、简明定义和例子，按�
 
 | 术语 | 英文 | 定义 | 例子 |
 |---|---|---|---|
+| <span id="g-识别器"></span>识别器 | Recognizer | sherpa-onnx 中加载了识别模型、负责识别的对象，一个程序通常只建一次 | `OfflineRecognizer.from_sense_voice(...)` |
+| <span id="g-数据流"></span>数据流 | Stream | sherpa-onnx 中装一段待识别音频的“容器”，每段录音建一个 | `stream = recognizer.create_stream()` |
+| <span id="g-语音活动检测"></span>语音活动检测 | Voice Activity Detection, VAD | 判断一段声音里哪些时间有人在说话、哪些是静音或噪声的技术 | 把 51 秒的会议录音切成 7 句 |
+| <span id="g-时间戳"></span>时间戳 | Timestamp | 每句话（或每个字）在录音中开始和结束的时间 | 第 2 句 10.18—17.10 秒 |
+| <span id="g-SRT-字幕"></span>SRT 字幕 | SubRip Subtitle | 最常见的字幕文件格式，每条字幕由序号、起止时间和文字组成 | `00:00:10,182 --> 00:00:17,100` |
+| <span id="g-文本逆正则化"></span>文本逆正则化 | Inverse Text Normalization, ITN | 把识别出的口语化写法转换成书面写法，如数字、日期、金额 | “二零二六年五月一号”→“2026年5月1日” |
+| <span id="g-标点恢复"></span>标点恢复 | Punctuation Restoration | 给没有标点的识别结果加上逗号、句号、问号 | Paraformer 的结果没有标点，SenseVoice 自带 |
+| <span id="g-非流式识别"></span>非流式识别 | Non-streaming ASR | 一段话说完、录音完整以后再整体识别 | 录音文件转写 |
+| <span id="g-流式识别"></span>流式识别 | Streaming ASR | 一边接收声音一边输出文字，不用等说完 | 会议实时字幕、语音输入法 |
+| <span id="g-唤醒词"></span>唤醒词 | Wake Word | 让设备从待机状态开始工作的特定词语 | “你好小站” |
+| <span id="g-误唤醒"></span>误唤醒 | False Alarm | 没有说唤醒词，设备却被唤醒 | 说“你好小张”时服务站亮了 |
+| <span id="g-漏唤醒"></span>漏唤醒 | False Rejection | 说了唤醒词，设备却没有反应 | 阈值太高时“小站小站”叫不醒 |
+| <span id="g-热词"></span>热词 | Hotword | 预先告诉识别系统、让它在识别时优先考虑的词，常用于人名、地名、专业术语 | 把“樟树苑”“韦嘉怡”设为热词 |
 
 ## 第 5 章 语音合成原理：从文字到声音
 

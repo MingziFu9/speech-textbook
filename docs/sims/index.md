@@ -15,3 +15,4 @@ description: 本书配套的交互动画，可以在浏览器里直接操作，�
 | 第 3 章 | [DTW 对齐](dtw-align/index.md) | 调语速和停顿，比较逐帧硬对比和 DTW 对齐的距离 |
 | 第 3 章 | [CTC 折叠](ctc-collapse/index.md) | 一步步合并重复、删掉空白，把逐帧输出变成文字 |
 | 第 3 章 | [字错率计算器](cer-calculator/index.md) | 输入原文和识别结果，看替换、删除、插入和字错率 |
+| 第 4 章 | [VAD 切句](vad-segment/index.md) | 调门槛和最短静音，看长录音被切成几句 |

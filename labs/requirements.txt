@@ -14,6 +14,7 @@ jieba>=0.42          # 0.42.1，第 5 章分词
 pypinyin>=0.50       # 0.55.0，第 5 章注音；第 4 章唤醒词转拼音
 sentencepiece>=0.2   # 0.2.2，第 4 章唤醒词（sherpa-onnx 的 text2token 要用）
 noisereduce>=3.0     # 3.0.3，第 2 章降噪
+zhconv>=1.4          # 1.4.3，第 4 章繁体转简体（统一写法后再算字错率）
 gradio>=5.0          # 6.31.0，第 9 章网页小工具
 jupyter              # 想用 Notebook 时安装
 
