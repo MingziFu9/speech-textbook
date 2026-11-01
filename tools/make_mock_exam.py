@@ -52,18 +52,18 @@ def renumber(block, n):
 # (章, 题型, 本章第几题)
 PAPERS = {
     "模拟卷一": {
-        "single": [(c, "single", 1) for c in range(1, 13)] + [(c, "single", 2) for c in range(1, 9)],
-        "multi": [(c, "multi", 1) for c in (1, 3, 5, 7, 9)],
-        "judge": [(c, "judge", 1) for c in range(1, 11)],
-        "short": [(6, "short", 1), (11, "short", 1)],
-        "practice": [(4, "practice", 1)],
+        "single": [(c, "single", k) for c in range(1, 10) for k in (1, 2)] + [(8, "single", 3), (9, "single", 3)],
+        "multi": [(c, "multi", 1) for c in (1, 3, 5, 7, 8)],
+        "judge": [(c, "judge", 1) for c in range(1, 10)] + [(8, "judge", 2)],
+        "short": [(3, "short", 1), (8, "short", 1)],
+        "practice": [(6, "practice", 1)],
     },
     "模拟卷二": {
-        "single": [(c, "single", 3) for c in range(1, 13)] + [(c, "single", 4) for c in range(5, 13)],
-        "multi": [(c, "multi", 2) for c in (2, 4, 6, 10, 12)],
-        "judge": [(c, "judge", 2) for c in range(3, 13)],
-        "short": [(8, "short", 1), (12, "short", 1)],
-        "practice": [(7, "practice", 1)],
+        "single": [(c, "single", k) for c in range(1, 10) for k in (4, 5)] + [(4, "single", 6), (7, "single", 6)],
+        "multi": [(c, "multi", 2) for c in (2, 4, 6, 8, 9)],
+        "judge": [(c, "judge", 3) for c in range(1, 10)] + [(9, "judge", 4)],
+        "short": [(5, "short", 1), (9, "short", 1)],
+        "practice": [(4, "practice", 1)],
     },
 }
 
@@ -73,7 +73,7 @@ def main():
     bank = {c: parse(c, d) for c, d in dirs.items()}
     lines = ["---", "title: 在线模拟卷", "description: 按期末开卷考试的题型和分值，从各章课后练习中组成的两套在线模拟卷，可以直接作答并查看解析", "---", "",
              "# 在线模拟卷", "",
-             "本课程期末为开卷考试，题目侧重理解和应用。下面两套模拟卷按期末考试的题型和分值，从各章课后练习中抽题组成，覆盖全书 12 章：",
+             "本课程期末为开卷考试，题目侧重理解和应用。下面两套模拟卷按期末考试的题型和分值，从各章课后练习中抽题组成，覆盖全书 9 章：",
              "", "| 题型 | 题数 | 每题分值 | 合计 |", "|---|---|---|---|"]
     for t, (name, score) in NAMES.items():
         k = len(PAPERS["模拟卷一"][t])
