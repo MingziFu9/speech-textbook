@@ -9,6 +9,22 @@
     4 学分 · 72 学时（理论 36 学时 + 实验 36 学时） · 第 4 学期 · 9 章 · 36 个实验 · 期末开卷
 <!-- course:end -->
 
+<!-- showcase:start -->
+## 先玩一玩
+
+<p class="sc-tagline">让机器听得懂、说得像、认得出</p>
+
+<div class="showcase" aria-label="精选交互动画">
+<ol class="sc-list">
+<li data-sim="sims/spectrogram-viewer/main.html" data-video="assets/showcase/spectrogram-viewer" data-title="看见声音" data-play="切换声音，看共振峰的亮线怎样移动。"><img src="assets/showcase/spectrogram-viewer.jpg" alt="看见声音截图" loading="lazy"><p class="sc-hook">同一个“啊”，男声和女声在频谱上差在哪？</p><p><b>看见声音</b>　切换声音，看共振峰的亮线怎样移动。</p><p><a href="sims/spectrogram-viewer/main.html">打开动画</a>　<a class="sc-chap" href="chapters/02-audio/" title="第 2 章 声音的数字化与音频处理">去读第2章 →</a></p></li>
+<li data-sim="sims/clone-settings/main.html" data-video="assets/showcase/clone-settings" data-title="参考时长与相似度" data-play="拖长参考录音，相似度一路上升。"><img src="assets/showcase/clone-settings.jpg" alt="参考时长与相似度截图" loading="lazy"><p class="sc-hook">只给 3 秒录音，能克隆出你的声音吗？</p><p><b>参考时长与相似度</b>　拖长参考录音，相似度一路上升。</p><p><a href="sims/clone-settings/main.html">打开动画</a>　<a class="sc-chap" href="chapters/08-voice-cloning/" title="第 8 章 语音克隆：技术、伦理与授权">去读第8章 →</a></p></li>
+<li data-sim="sims/vocoder-compare/main.html" data-video="assets/showcase/vocoder-compare" data-title="从频谱到声音" data-play="Griffin-Lim、HiFi-GAN、Vocos 逐个播放。"><img src="assets/showcase/vocoder-compare.jpg" alt="从频谱到声音截图" loading="lazy"><p class="sc-hook">同一张频谱，三代声码器念出来差多少？</p><p><b>从频谱到声音</b>　Griffin-Lim、HiFi-GAN、Vocos 逐个播放。</p><p><a href="sims/vocoder-compare/main.html">打开动画</a>　<a class="sc-chap" href="chapters/05-tts-principles/" title="第 5 章 语音合成原理：从文字到声音">去读第5章 →</a></p></li>
+<li data-sim="sims/voiceprint-map/main.html" data-video="assets/showcase/voiceprint-map" data-title="声纹地图" data-play="冒充者混进来，离真身有多远？"><img src="assets/showcase/voiceprint-map.jpg" alt="声纹地图截图" loading="lazy"><p class="sc-hook">每个人的声音，在地图上都有自己的位置</p><p><b>声纹地图</b>　冒充者混进来，离真身有多远？</p><p><a href="sims/voiceprint-map/main.html">打开动画</a>　<a class="sc-chap" href="chapters/07-speaker/" title="第 7 章 声纹识别与语音转换">去读第7章 →</a></p></li>
+<li data-sim="sims/speech-pipeline/main.html" data-video="assets/showcase/speech-pipeline" data-title="语音对话流水线" data-play="唤醒、识别、理解、回答、合成，看延迟花在哪。"><img src="assets/showcase/speech-pipeline.jpg" alt="语音对话流水线截图" loading="lazy"><p class="sc-hook">一句话从说出口到听到回答，要经过几站？</p><p><b>语音对话流水线</b>　唤醒、识别、理解、回答、合成，看延迟花在哪。</p><p><a href="sims/speech-pipeline/main.html">打开动画</a>　<a class="sc-chap" href="chapters/01-overview/" title="第 1 章 走进语音技术">去读第1章 →</a></p></li>
+</ol>
+</div>
+<!-- showcase:end -->
+
 ## 这本书讲什么
 
 这门课研究怎样让机器“听”和“说”：**语音识别**把人说的话变成文字，**语音合成**把文字读成自然的声音，**声纹识别**听出是谁在说话，**语音克隆**用几秒钟的录音让机器学会一个人的嗓音。这些技术就在身边：微信语音转文字、会议实时字幕、导航播报、有声书、智能音箱、银行的声纹核验，还有借 AI 声音行骗的电话诈骗。

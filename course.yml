@@ -51,3 +51,62 @@ lesson_plan:
   online_ratio: 0.5                   # 线上学时占比（开放大学以线上为主，按实际改）
   teacher: ""                         # 授课教师，留空则教案上留出填写位置
   school: ""                          # 学校名称，留空则不显示
+
+# 首页“先玩一玩”轮播：按轮播顺序写，第 1 个放画面最震撼的。sim 是 docs/sims/ 下的目录名，hook 是一句问句，play 是一句玩法；
+# steps 是录短视频时自动做的操作（写法见 编写规范.md“首页轮播”）。改完运行 python tools/showcase.py record 重录视频。
+showcase_tagline: "让机器听得懂、说得像、认得出"
+showcase:
+  - sim: spectrogram-viewer
+    hook: "同一个“啊”，男声和女声在频谱上差在哪？"
+    play: "切换声音，看共振峰的亮线怎样移动。"
+    steps:
+      - ["click", "口哨（滑音）", {"hold": 1}]
+      - ["poster"]
+      - ["click", "元音“啊”", {"hold": 1}]
+      - ["click", "男声“啊”", {"hold": 1}]
+      - ["click", "噪声", {"hold": 1}]
+      - ["click", "敲门声", {"hold": 1.2}]
+  - sim: clone-settings
+    hook: "只给 3 秒录音，能克隆出你的声音吗？"
+    play: "拖长参考录音，相似度一路上升。"
+    vw: 820
+    steps:
+      - ["slide", "#sl", 1, {"hold": 0.8}]
+      - ["slide", "#sl", 2, {"hold": 0.8}]
+      - ["slide", "#sl", 3, {"hold": 1}]
+      - ["poster"]
+      - ["click", "改生成步数", {"hold": 0.6}]
+      - ["slide", "#sl", 3, {"hold": 1}]
+  - sim: vocoder-compare
+    hook: "同一张频谱，三代声码器念出来差多少？"
+    play: "Griffin-Lim、HiFi-GAN、Vocos 逐个播放。"
+    steps:
+      - ["move", 0.5, 0.5]
+      - ["hold", 0.8]
+      - ["scroll", 300, {}]
+      - ["hold", 1]
+      - ["scroll", 700]
+      - ["hold", 1.4]
+      - ["poster"]
+      - ["scroll", 0]
+  - sim: voiceprint-map
+    hook: "每个人的声音，在地图上都有自己的位置"
+    play: "冒充者混进来，离真身有多远？"
+    steps:
+      - ["at", "#cv", 0.07, 0.1, {"hold": 1}]
+      - ["at", "#cv", 0.93, 0.33, {"hold": 1.2}]
+      - ["poster"]
+      - ["at", "#cv", 0.66, 0.75, {"hold": 1}]
+      - ["at", "#cv", 0.25, 0.88, {"hold": 1}]
+      - ["at", "#cv", 0.59, 0.43, {"hold": 1}]
+  - sim: speech-pipeline
+    hook: "一句话从说出口到听到回答，要经过几站？"
+    play: "唤醒、识别、理解、回答、合成，看延迟花在哪。"
+    vw: 860
+    steps:
+      - ["click", {"text": "1. 唤醒"}, {"hold": 0.9}]
+      - ["click", {"text": "3. 理解"}, {"hold": 0.9}]
+      - ["click", "大模型", {"hold": 1.2}]
+      - ["poster"]
+      - ["click", {"text": "4. 回答"}, {"hold": 0.9}]
+      - ["click", {"text": "5. 合成"}, {"hold": 1}]
